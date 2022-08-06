@@ -8,6 +8,8 @@ class AudioBuffer;
 
 class AudioProcessor final {
 public:
+    AudioProcessor();
+
     AudioProcessor(int audioLength, int windowSize, int stepSize, int poolingSize);
 
     ~AudioProcessor();

@@ -1,5 +1,6 @@
 #include "AudioProcessor.hpp"
 
+#include "Config.hpp"
 #include "AudioBuffer.hpp"
 
 #include <cfloat>
@@ -38,6 +39,11 @@ getMaxDeviationValue(AudioBuffer buffer, int audioLength, float mean)
 
 } // namespace
 
+AudioProcessor::AudioProcessor()
+    : AudioProcessor{WWD_AUDIO_LENGTH, WWD_WINDOW_SIZE, WWD_STEP_SIZE, WWD_POOLING_SIZE}
+{
+}
+
 AudioProcessor::AudioProcessor(int audioLength, int windowSize, int stepSize, int poolingSize)
     : _audioLength{audioLength}
     , _windowSize{windowSize}
@@ -65,6 +71,8 @@ AudioProcessor::getSpectrogram(AudioBuffer& buffer, float* outputSpectrogram)
 {
     const float mean = getMeanValue(buffer, _audioLength);
     const float maxDeviation = getMaxDeviationValue(buffer, _audioLength, mean);
+
+    assert(outputSpectrogram != nullptr);
 
     const int startIndex = buffer.pos();
     for (int windowStart = startIndex; windowStart < startIndex + _audioLength - _windowSize;
