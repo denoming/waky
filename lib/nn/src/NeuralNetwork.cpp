@@ -1,13 +1,18 @@
 #include "NeuralNetwork.hpp"
 
+#include "Model.hpp"
+
 #include <tensorflow/lite/micro/all_ops_resolver.h>
 #include <tensorflow/lite/micro/micro_error_reporter.h>
 #include <tensorflow/lite/micro/micro_interpreter.h>
 #include <tensorflow/lite/schema/schema_generated.h>
 
-#include "Model.hpp"
+#include <esp_err.h>
+#include <esp_log.h>
 
 static const int kArenaSize = 25000;
+
+static const char* TAG = "ESP32 JRVA - NN";
 
 NeuralNetwork::NeuralNetwork()
     : _arena{nullptr}
@@ -25,21 +30,22 @@ bool
 NeuralNetwork::setUp()
 {
     if (!_arena) {
+        ESP_LOGI(TAG, "Allocate memory for arane: %d size", kArenaSize);
         _arena = new (std::nothrow) uint8_t[kArenaSize];
-        if (!_arena) {
-            TF_LITE_REPORT_ERROR(_reporter, "Failed to allocate memory for arena");
+        if (_arena == nullptr) {
+            ESP_LOGE(TAG, "Failed to allocate memory for arena");
             return false;
         }
     }
 
-    if (!_model) {
+    if (_model == nullptr) {
+        ESP_LOGI(TAG, "Load prediction model");
         _model = tflite::GetModel(TF_MODEL);
         if (_model->version() != TFLITE_SCHEMA_VERSION) {
-            TF_LITE_REPORT_ERROR(
-                _reporter,
-                "Model provided is schema version %d not equal to supported version %d.",
-                _model->version(),
-                TFLITE_SCHEMA_VERSION);
+            ESP_LOGE(TAG,
+                     "Invalid model <%d> while <%d> expected",
+                     _model->version(),
+                     TFLITE_SCHEMA_VERSION);
             _model = nullptr;
             return false;
         }
@@ -58,19 +64,19 @@ NeuralNetwork::setUp()
 
     _interpreter = new (std::nothrow)
         tflite::MicroInterpreter(_model, *_resolver, _arena, kArenaSize, _reporter);
-    if (!_interpreter) {
-        TF_LITE_REPORT_ERROR(_reporter, "Failed to instantiate interpreter");
+    if (_interpreter == nullptr) {
+        ESP_LOGE(TAG, "Failed to instantiate interpreter");
         return false;
     }
 
     const auto status = _interpreter->AllocateTensors();
     if (status != kTfLiteOk) {
-        TF_LITE_REPORT_ERROR(_reporter, "AllocateTensors() failed");
+        ESP_LOGE(TAG, "AllocateTensors() failed");
         tearDown();
         return false;
     }
     size_t usedBytes = _interpreter->arena_used_bytes();
-    TF_LITE_REPORT_ERROR(_reporter, "Used bytes %d\n", usedBytes);
+    ESP_LOGI(TAG, "Used bytes %d\n", usedBytes);
 
     _input = _interpreter->input(0);
     _output = _interpreter->output(0);
