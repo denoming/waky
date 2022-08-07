@@ -1,6 +1,5 @@
 #include "DetectWakeWordState.hpp"
 
-#include "Config.hpp"
 #include "NeuralNetwork.hpp"
 #include "AudioProcessor.hpp"
 #include "MemsMicrophone.hpp"
@@ -35,7 +34,7 @@ DetectWakeWordState::run()
     ESP_LOGI(TAG, "run()");
 
     auto buffer = _sampler.buffer();
-    buffer.seek(buffer.pos() - I2S_SAMPLE_RATE);
+    buffer.seek(buffer.pos() - CONFIG_JRVA_I2S_SAMPLE_RATE);
     float* inputBuffer = _nn->getInputBuffer();
     _audioProcessor->getSpectrogram(buffer, inputBuffer);
     const float output = _nn->predict();

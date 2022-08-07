@@ -7,6 +7,8 @@
 
 class MemsMicrophone final : public AudioInputSampler {
 public:
+    MemsMicrophone(MemoryPool& memoryPool);
+
     MemsMicrophone(i2s_pin_config_t pins,
                    i2s_port_t port,
                    i2s_config_t config,

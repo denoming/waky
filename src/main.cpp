@@ -2,7 +2,6 @@
 #include <freertos/task.h>
 
 #include "WiFi.hpp"
-#include "Config.hpp"
 #include "NeuralNetwork.hpp"
 #include "AudioProcessor.hpp"
 #include "AudioBuffer.hpp"
@@ -32,7 +31,7 @@ loop()
     static const TickType_t kMaxBlockTime = pdMS_TO_TICKS(100);
 
     MemoryPool memoryPool;
-    MemsMicrophone mic{I2S_PIN_CONFIG, I2S_INMP441_PORT, I2S_CONFIG, memoryPool};
+    MemsMicrophone mic{memoryPool};
     ESP_LOGI(TAG, "Start listening on MEMS microphone");
     if (!mic.start(xTaskGetCurrentTaskHandle())) {
         ESP_LOGE(TAG, "Failed to start microphone");

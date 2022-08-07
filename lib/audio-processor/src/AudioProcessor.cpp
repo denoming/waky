@@ -1,6 +1,5 @@
 #include "AudioProcessor.hpp"
 
-#include "Config.hpp"
 #include "AudioBuffer.hpp"
 
 #include <cfloat>
@@ -40,7 +39,10 @@ getMaxDeviationValue(AudioBuffer buffer, int audioLength, float mean)
 } // namespace
 
 AudioProcessor::AudioProcessor()
-    : AudioProcessor{WWD_AUDIO_LENGTH, WWD_WINDOW_SIZE, WWD_STEP_SIZE, WWD_POOLING_SIZE}
+    : AudioProcessor{CONFIG_JRVA_I2S_SAMPLE_RATE,
+                     CONFIG_JRVA_WWD_WINDOW_SIZE,
+                     CONFIG_JRVA_WWD_STEP_SIZE,
+                     CONFIG_JRVA_WWD_POOLING_SIZE}
 {
 }
 

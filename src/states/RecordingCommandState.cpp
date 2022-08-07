@@ -1,6 +1,5 @@
 #include "RecordingCommandState.hpp"
 
-#include "Config.hpp"
 #include "MemsMicrophone.hpp"
 #include "MemoryPool.hpp"
 #include "HttpChunkSender.hpp"
@@ -50,7 +49,7 @@ RecordingCommandState::run()
     auto buffer = _sampler.buffer();
     if (_lastAudioPosition == DEFAULT_POSITION) {
         ESP_LOGI(TAG, "Initialize the last audio position");
-        _lastAudioPosition = buffer.pos() - I2S_SAMPLE_RATE;
+        _lastAudioPosition = buffer.pos() - CONFIG_JRVA_I2S_SAMPLE_RATE;
     }
 
     static const int32_t capacity = MemoryPool::capacity();

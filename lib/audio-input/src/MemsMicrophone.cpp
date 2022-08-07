@@ -1,12 +1,44 @@
 #include "MemsMicrophone.hpp"
 
-#include <esp_log.h>
-#include <esp_assert.h>
+#include "MemoryPool.hpp"
+
+#include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
-#include "Config.hpp"
+#include <esp_log.h>
+#include <esp_assert.h>
 
-static const char* TAG = "ESP32 TFLITE WWD - MemsMicrophone";
+static const char* TAG = "ESP32 TFLITE WWD - MM";
+
+static const i2s_config_t I2S_CONFIG = {
+    .mode = (i2s_mode_t) (I2S_MODE_MASTER | I2S_MODE_RX),
+    .sample_rate = CONFIG_JRVA_I2S_SAMPLE_RATE,
+    .bits_per_sample = I2S_BITS_PER_SAMPLE_32BIT,
+    .channel_format = I2S_CHANNEL_FMT_ONLY_LEFT,
+    .communication_format = I2S_COMM_FORMAT_STAND_I2S,
+    .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1,
+    .dma_buf_count = CONFIG_JRVA_I2S_DMA_BUFFER_COUNT,
+    .dma_buf_len = CONFIG_JRVA_I2S_DMA_BUFFER_SIZE,
+    .use_apll = false,
+    .tx_desc_auto_clear = false,
+    .fixed_mclk = 0,
+    .mclk_multiple = I2S_MCLK_MULTIPLE_DEFAULT,
+    .bits_per_chan = I2S_BITS_PER_CHAN_DEFAULT,
+};
+
+static const i2s_pin_config_t I2S_PIN_CONFIG = {
+    .mck_io_num = I2S_PIN_NO_CHANGE,
+    .bck_io_num = CONFIG_JRVA_I2S_MIC_SCK,
+    .ws_io_num = CONFIG_JRVA_I2S_MIC_WS,
+    .data_out_num = I2S_PIN_NO_CHANGE,
+    .data_in_num = CONFIG_JRVA_I2S_MIC_SD,
+};
+
+MemsMicrophone::MemsMicrophone(MemoryPool& memoryPool)
+    : MemsMicrophone{
+        I2S_PIN_CONFIG, static_cast<i2s_port_t>(CONFIG_JRVA_I2S_MIC_PORT), I2S_CONFIG, memoryPool}
+{
+}
 
 MemsMicrophone::MemsMicrophone(i2s_pin_config_t pins,
                                i2s_port_t port,
@@ -91,7 +123,9 @@ void
 MemsMicrophone::pullDataTask(void* param)
 {
     static const std::size_t kNotifyThreshold = 1600;
-    static const std::size_t kBufferSize = I2S_DMA_BUFFER_LEN * I2S_SAMPLE_BYTES * I2S_SAMPLE_BYTES;
+    static const std::size_t kBufferSize = CONFIG_JRVA_I2S_DMA_BUFFER_COUNT
+                                           * CONFIG_JRVA_I2S_DMA_BUFFER_SIZE
+                                           * CONFIG_JRVA_I2S_SAMPLE_BYTES;
 
     assert(param != nullptr);
     MemsMicrophone* mic = static_cast<MemsMicrophone*>(param);
