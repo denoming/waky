@@ -14,7 +14,7 @@ public:
     static Application&
     create();
 
-    void
+    bool
     setup();
 
     void

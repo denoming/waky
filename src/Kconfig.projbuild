@@ -1,4 +1,18 @@
 menu "J.A.R.V.I.S Agent Configuration"
+    menu "Memory pool"
+        config JRVA_MEMPOOL_BUFFER_SIZE
+            int "Memory pool buffer size"
+            default 16000
+            help
+                The memory pool buffer size in bytes (correspond to sample rate)
+
+        config JRVA_MEMPOOL_BUFFER_COUNT
+            int "Memory pool count of buffers"
+            default 3
+            range 1 5
+            help
+                The memory pool buffer count
+    endmenu
 
     menu "Wake word detection"
         config JRVA_WWD_WINDOW_SIZE

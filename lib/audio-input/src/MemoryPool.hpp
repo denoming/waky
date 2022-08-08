@@ -4,8 +4,28 @@
 
 class MemoryPool final {
 public:
-    static const std::size_t ChunkCount = 3;
-    static const std::size_t ChunkSize = 16000;
+    MemoryPool();
+
+    ~MemoryPool();
+
+    bool
+    allocate();
+
+    void
+    deallocate();
+
+    void
+    set(std::size_t index, std::uint16_t value);
+
+    std::uint16_t
+    get(std::size_t index) const;
+
+    static inline std::size_t
+    capacity();
+
+private:
+    static const std::size_t ChunkCount = CONFIG_JRVA_MEMPOOL_BUFFER_COUNT;
+    static const std::size_t ChunkSize = CONFIG_JRVA_MEMPOOL_BUFFER_SIZE;
 
     class Chunk {
     public:
@@ -29,20 +49,6 @@ public:
     private:
         std::array<std::int16_t, ChunkSize> _payload;
     };
-
-public:
-    MemoryPool();
-
-    ~MemoryPool();
-
-    static inline std::size_t
-    capacity();
-
-    void
-    set(std::size_t index, std::uint16_t value);
-
-    std::uint16_t
-    get(std::size_t index) const;
 
 private:
     std::array<Chunk*, ChunkCount> _chunks;

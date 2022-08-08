@@ -2,6 +2,7 @@
 
 #include "states/DetectWakeWordState.hpp"
 #include "states/RecordingCommandState.hpp"
+#include "misc/Utils.hpp"
 
 #include <esp_err.h>
 #include <esp_log.h>
@@ -24,11 +25,20 @@ Application::Application()
 {
 }
 
-void
+bool
 Application::setup()
 {
+    ESP_LOGI(TAG, "Allocate memory for memory pool");
+    if (!_memory.allocate()) {
+        ESP_LOGE(TAG, "Failed to allocate memory for memory pool");
+        return false;
+    }
+    printHeapInfo(TAG);
+
     _detectionState.reset(new DetectWakeWordState{_sampler});
     _recordingState.reset(new RecordingCommandState{_sampler});
+
+    return true;
 }
 
 void
