@@ -1,0 +1,5 @@
+#
+# ESP System Settings
+#
+CONFIG_ESP_TASK_WDT=n
+# end of ESP System Settings
