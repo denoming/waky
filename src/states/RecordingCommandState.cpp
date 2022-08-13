@@ -43,7 +43,7 @@ RecordingCommandState::run()
 
     if (!_client->connected()) {
         ESP_LOGE(TAG, "No connection with recognizer backend");
-        return false;
+        return true;
     }
 
     auto buffer = _sampler.buffer();
