@@ -2,7 +2,9 @@
 
 #include "states/DetectWakeWordState.hpp"
 #include "states/RecordingCommandState.hpp"
+#ifdef DEBUG
 #include "misc/Utils.hpp"
+#endif
 
 #include <esp_err.h>
 #include <esp_log.h>
@@ -28,12 +30,15 @@ Application::Application()
 bool
 Application::setup()
 {
-    ESP_LOGI(TAG, "Allocate memory for memory pool");
+    ESP_LOGD(TAG, "Allocate memory for memory pool");
     if (!_memory.allocate()) {
         ESP_LOGE(TAG, "Failed to allocate memory for memory pool");
         return false;
     }
-    printHeapInfo(TAG);
+
+#ifdef DEBUG
+    printHeapInfo(TAG, "After memory pool allocation");
+#endif
 
     _detectionState.reset(new DetectWakeWordState{_sampler});
     _recordingState.reset(new RecordingCommandState{_sampler});
@@ -62,7 +67,7 @@ Application::main()
 {
     static const TickType_t kMaxBlockTime = pdMS_TO_TICKS(100);
 
-    ESP_LOGI(TAG, "Start listening on MEMS microphone");
+    ESP_LOGD(TAG, "Start listening on MEMS microphone");
     if (!_sampler.start(_task)) {
         ESP_LOGE(TAG, "Failed to start microphone listening");
         return vTaskDelete(_task);
@@ -71,7 +76,7 @@ Application::main()
     assert(_currentState != nullptr);
     _currentState->enterState();
 
-    ESP_LOGI(TAG, "Start aplication lopping");
+    ESP_LOGD(TAG, "Start aplication loop");
     while (true) {
         const uint32_t notificationValue = ulTaskNotifyTake(pdTRUE, kMaxBlockTime);
         if (notificationValue > 0) {

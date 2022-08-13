@@ -30,7 +30,7 @@ bool
 NeuralNetwork::setUp()
 {
     if (!_arena) {
-        ESP_LOGI(TAG, "Allocate memory for arane: %d size", kArenaSize);
+        ESP_LOGD(TAG, "Allocate memory for arane: %d size", kArenaSize);
         _arena = new (std::nothrow) uint8_t[kArenaSize];
         if (_arena == nullptr) {
             ESP_LOGE(TAG, "Failed to allocate memory for arena");
@@ -39,7 +39,7 @@ NeuralNetwork::setUp()
     }
 
     if (_model == nullptr) {
-        ESP_LOGI(TAG, "Load prediction model");
+        ESP_LOGD(TAG, "Load prediction model");
         _model = tflite::GetModel(TF_MODEL);
         if (_model->version() != TFLITE_SCHEMA_VERSION) {
             ESP_LOGE(TAG,
@@ -76,7 +76,7 @@ NeuralNetwork::setUp()
         return false;
     }
     size_t usedBytes = _interpreter->arena_used_bytes();
-    ESP_LOGI(TAG, "Used bytes %d\n", usedBytes);
+    ESP_LOGD(TAG, "Used bytes %d\n", usedBytes);
 
     _input = _interpreter->input(0);
     _output = _interpreter->output(0);

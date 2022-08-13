@@ -1,4 +1,4 @@
 #pragma once
 
 void
-printHeapInfo(const char* tag);
+printHeapInfo(const char* tag, const char* prefix);

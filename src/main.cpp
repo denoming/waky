@@ -3,6 +3,9 @@
 
 #include "WiFi.hpp"
 #include "Application.hpp"
+#ifdef DEBUG
+#include "misc/Utils.hpp"
+#endif
 
 #include <esp_err.h>
 #include <esp_log.h>
@@ -15,22 +18,25 @@ static Application& application = Application::create();
 void
 setup()
 {
-    ESP_LOGI(TAG, "Setup WiFi");
+    ESP_LOGD(TAG, "Setup WiFi");
     wifi.setUp();
-    ESP_LOGI(TAG, "Setup Application");
+    ESP_LOGD(TAG, "Setup Application");
     application.setup();
 }
 
 void
 run()
 {
-    ESP_LOGI(TAG, "Start Application");
+    ESP_LOGD(TAG, "Start Application");
     application.start();
 }
 
 extern "C" void
 app_main()
 {
+#ifdef DEBUG
+    printHeapInfo(TAG, "MAIN");
+#endif
     setup();
     run();
 }

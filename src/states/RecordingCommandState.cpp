@@ -28,7 +28,10 @@ RecordingCommandState::enterState()
     _startTime = steady_clock::now();
     _elapsedTime = {};
 
+    ESP_LOGD(TAG, "Initialize HTTP client");
     _client.reset(new HttpClient{"192.168.1.20", 8000, "/speech"});
+
+    ESP_LOGD(TAG, "Create connection to backend");
     _client->setHeader(Http::Field::Expect, "100-continue");
     _client->setHeader(Http::Field::UserAgent, "J.A.R.V.I.S Agent");
     _client->setMethod(HTTP_METHOD_POST);
@@ -39,7 +42,7 @@ RecordingCommandState::enterState()
 bool
 RecordingCommandState::run()
 {
-    ESP_LOGI(TAG, "run()");
+    ESP_LOGD(TAG, "run()");
 
     if (!_client->connected()) {
         ESP_LOGE(TAG, "No connection with recognizer backend");
@@ -48,14 +51,14 @@ RecordingCommandState::run()
 
     auto buffer = _sampler.buffer();
     if (_lastAudioPosition == DEFAULT_POSITION) {
-        ESP_LOGI(TAG, "Initialize the last audio position");
+        ESP_LOGD(TAG, "Initialize the last audio position");
         _lastAudioPosition = buffer.pos() - CONFIG_JRVA_I2S_SAMPLE_RATE;
     }
 
     static const int32_t capacity = MemoryPool::capacity();
     long sampleCount = (buffer.pos() - _lastAudioPosition + capacity) % capacity;
     if (sampleCount > 0) {
-        ESP_LOGI(TAG, "The <%ld> samples is ready to send", sampleCount);
+        ESP_LOGD(TAG, "The <%ld> samples is ready to send", sampleCount);
 
         HttpChunkSender sender{*_client};
         sender.startChunk(sampleCount * sizeof(int16_t));
@@ -66,7 +69,6 @@ RecordingCommandState::run()
             for (int i = 0; i < sampleCount && i < 500; ++i) {
                 chunk[i] = buffer.next();
             }
-            ESP_LOGI(TAG, "Send the next chunk: %ld", sampleCount);
             sender.writeChunk(reinterpret_cast<const char*>(&chunk[0]),
                               std::min(sampleCount, 500l) * sizeof(int16_t));
             sampleCount -= 500;
@@ -79,7 +81,7 @@ RecordingCommandState::run()
         _startTime = now;
         if (duration_cast<milliseconds>(_elapsedTime) > milliseconds{2000}) {
             sender.finalize();
-            ESP_LOGI(TAG, "Analize recognition result");
+            ESP_LOGD(TAG, "Analize recognition result");
             // recognizer->getResult()
             vTaskDelay(pdMS_TO_TICKS(100));
             return true;
@@ -95,9 +97,11 @@ RecordingCommandState::exitState()
     ESP_LOGI(TAG, "exitState()");
 
     if (_client) {
+        ESP_LOGD(TAG, "Close connection to backend");
         _client->disconnect();
         _client->cleanup();
     }
 
+    ESP_LOGD(TAG, "Deinitialize HTTP client");
     _client.reset();
 }
