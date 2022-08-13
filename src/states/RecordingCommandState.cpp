@@ -55,7 +55,7 @@ RecordingCommandState::run()
         _lastAudioPosition = audioData.pos() - CONFIG_JRVA_I2S_SAMPLE_RATE;
     }
 
-    static const int32_t capacity = MemoryPool::capacity();
+    static const auto capacity = MemoryPool::capacity();
     long sampleCount = (audioData.pos() - _lastAudioPosition + capacity) % capacity;
     if (sampleCount > 0) {
         ESP_LOGD(TAG, "The <%ld> samples is ready to send", sampleCount);

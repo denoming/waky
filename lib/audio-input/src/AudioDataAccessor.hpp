@@ -21,11 +21,11 @@ public:
     std::int16_t
     next();
 
-    int
+    std::size_t
     pos() const;
 
     void
-    seek(int index);
+    seek(long offset);
 
     AudioDataAccessor
     clone();

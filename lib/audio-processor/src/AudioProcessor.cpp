@@ -76,8 +76,9 @@ AudioProcessor::getSpectrogram(AudioDataAccessor& audioData, float* outputSpectr
 
     assert(outputSpectrogram != nullptr);
 
-    const int startIndex = audioData.pos();
-    for (int windowStart = startIndex; windowStart < startIndex + _audioLength - _windowSize;
+    const auto startIndex = audioData.pos();
+    for (std::size_t windowStart = startIndex;
+         windowStart < startIndex + _audioLength - _windowSize;
          windowStart += _stepSize) {
         audioData.seek(windowStart);
         for (int i = 0; i < _windowSize; i++) {

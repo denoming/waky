@@ -39,17 +39,17 @@ AudioDataAccessor::next()
     return sample;
 }
 
-int
+std::size_t
 AudioDataAccessor::pos() const
 {
     return _index;
 }
 
 void
-AudioDataAccessor::seek(int index)
+AudioDataAccessor::seek(long offset)
 {
-    int totalSize = MemoryPool::capacity();
-    _index = (index + totalSize) % totalSize;
+    /* Normalization of negative offset */
+    _index = (offset + MemoryPool::capacity()) % MemoryPool::capacity();
 }
 
 AudioDataAccessor
