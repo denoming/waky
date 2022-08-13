@@ -5,9 +5,9 @@
 
 class MemoryPool;
 
-class AudioBuffer final {
+class AudioDataAccessor final {
 public:
-    explicit AudioBuffer(MemoryPool& memoryPool);
+    explicit AudioDataAccessor(MemoryPool& memoryPool);
 
     void
     set(std::int16_t sample);
@@ -27,7 +27,7 @@ public:
     void
     seek(int index);
 
-    AudioBuffer
+    AudioDataAccessor
     clone();
 
 private:

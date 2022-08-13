@@ -49,14 +49,14 @@ RecordingCommandState::run()
         return true;
     }
 
-    auto buffer = _sampler.buffer();
+    auto audioData = _sampler.data();
     if (_lastAudioPosition == DEFAULT_POSITION) {
         ESP_LOGD(TAG, "Initialize the last audio position");
-        _lastAudioPosition = buffer.pos() - CONFIG_JRVA_I2S_SAMPLE_RATE;
+        _lastAudioPosition = audioData.pos() - CONFIG_JRVA_I2S_SAMPLE_RATE;
     }
 
     static const int32_t capacity = MemoryPool::capacity();
-    long sampleCount = (buffer.pos() - _lastAudioPosition + capacity) % capacity;
+    long sampleCount = (audioData.pos() - _lastAudioPosition + capacity) % capacity;
     if (sampleCount > 0) {
         ESP_LOGD(TAG, "The <%ld> samples is ready to send", sampleCount);
 
@@ -64,16 +64,16 @@ RecordingCommandState::run()
         sender.startChunk(sampleCount * sizeof(int16_t));
 
         int16_t chunk[500];
-        buffer.seek(_lastAudioPosition);
+        audioData.seek(_lastAudioPosition);
         while (sampleCount > 0) {
             for (int i = 0; i < sampleCount && i < 500; ++i) {
-                chunk[i] = buffer.next();
+                chunk[i] = audioData.next();
             }
             sender.writeChunk(reinterpret_cast<const char*>(&chunk[0]),
                               std::min(sampleCount, 500l) * sizeof(int16_t));
             sampleCount -= 500;
         }
-        _lastAudioPosition = buffer.pos();
+        _lastAudioPosition = audioData.pos();
         sender.endChunk();
 
         const auto now = steady_clock::now();

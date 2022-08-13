@@ -1,6 +1,6 @@
 #include "AudioProcessor.hpp"
 
-#include "AudioBuffer.hpp"
+#include "AudioDataAccessor.hpp"
 
 #include <cfloat>
 
@@ -17,21 +17,21 @@ getInputSize(int windowSize)
 }
 
 float
-getMeanValue(AudioBuffer buffer, int audioLength)
+getMeanValue(AudioDataAccessor audioData, int audioLength)
 {
     float mean{0.0};
     for (int i = 0; i < audioLength; i++) {
-        mean += buffer.next();
+        mean += audioData.next();
     }
     return (mean / audioLength);
 }
 
 float
-getMaxDeviationValue(AudioBuffer buffer, int audioLength, float mean)
+getMaxDeviationValue(AudioDataAccessor audioData, int audioLength, float mean)
 {
     float max{0.0};
     for (int i = 0; i < audioLength; i++) {
-        max = std::max(max, fabsf(static_cast<float>(buffer.next()) - mean));
+        max = std::max(max, fabsf(static_cast<float>(audioData.next()) - mean));
     }
     return max;
 }
@@ -69,19 +69,19 @@ AudioProcessor::~AudioProcessor()
 }
 
 void
-AudioProcessor::getSpectrogram(AudioBuffer& buffer, float* outputSpectrogram)
+AudioProcessor::getSpectrogram(AudioDataAccessor& audioData, float* outputSpectrogram)
 {
-    const float mean = getMeanValue(buffer, _audioLength);
-    const float maxDeviation = getMaxDeviationValue(buffer, _audioLength, mean);
+    const float mean = getMeanValue(audioData, _audioLength);
+    const float maxDeviation = getMaxDeviationValue(audioData, _audioLength, mean);
 
     assert(outputSpectrogram != nullptr);
 
-    const int startIndex = buffer.pos();
+    const int startIndex = audioData.pos();
     for (int windowStart = startIndex; windowStart < startIndex + _audioLength - _windowSize;
          windowStart += _stepSize) {
-        buffer.seek(windowStart);
+        audioData.seek(windowStart);
         for (int i = 0; i < _windowSize; i++) {
-            _fftInput[i] = (static_cast<float>(buffer.next()) - mean) / maxDeviation;
+            _fftInput[i] = (static_cast<float>(audioData.next()) - mean) / maxDeviation;
         }
         for (int i = _windowSize; i < _fftSize; i++) {
             _fftInput[i] = 0;

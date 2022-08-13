@@ -47,7 +47,7 @@ MemsMicrophone::MemsMicrophone(i2s_pin_config_t pins,
     : _pins{pins}
     , _port{port}
     , _config{config}
-    , _buffer{memoryPool}
+    , _accessor{memoryPool}
     , _waiter{nullptr}
 {
 }
@@ -86,10 +86,10 @@ MemsMicrophone::start(TaskHandle_t waiter)
     return true;
 }
 
-AudioBuffer
-MemsMicrophone::buffer()
+AudioDataAccessor
+MemsMicrophone::data()
 {
-    return _buffer.clone();
+    return _accessor.clone();
 }
 
 std::size_t
@@ -115,7 +115,7 @@ MemsMicrophone::processData(const uint8_t* buffer, std::size_t size)
     const auto* samples = reinterpret_cast<const int32_t*>(buffer);
     assert(samples != nullptr);
     for (int i = 0; i < size / sizeof(int32_t); ++i) {
-        _buffer.put(samples[i] >> kDataBitShift);
+        _accessor.put(samples[i] >> kDataBitShift);
     }
 }
 

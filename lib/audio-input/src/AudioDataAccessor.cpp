@@ -1,38 +1,38 @@
-#include "AudioBuffer.hpp"
+#include "AudioDataAccessor.hpp"
 
 #include <esp_assert.h>
 
 #include "MemoryPool.hpp"
 
-AudioBuffer::AudioBuffer(MemoryPool& memoryPool)
+AudioDataAccessor::AudioDataAccessor(MemoryPool& memoryPool)
     : _memoryPool{memoryPool}
     , _index{0}
 {
 }
 
 void
-AudioBuffer::set(std::int16_t sample)
+AudioDataAccessor::set(std::int16_t sample)
 {
     assert(_index < MemoryPool::capacity());
     _memoryPool.set(_index, sample);
 }
 
 std::int16_t
-AudioBuffer::get() const
+AudioDataAccessor::get() const
 {
     assert(_index < MemoryPool::capacity());
     return _memoryPool.get(_index);
 }
 
 void
-AudioBuffer::put(std::int16_t sample)
+AudioDataAccessor::put(std::int16_t sample)
 {
     set(sample);
     next();
 }
 
 std::int16_t
-AudioBuffer::next()
+AudioDataAccessor::next()
 {
     std::int16_t sample = get();
     _index = (_index + 1) % MemoryPool::capacity();
@@ -40,22 +40,22 @@ AudioBuffer::next()
 }
 
 int
-AudioBuffer::pos() const
+AudioDataAccessor::pos() const
 {
     return _index;
 }
 
 void
-AudioBuffer::seek(int index)
+AudioDataAccessor::seek(int index)
 {
     int totalSize = MemoryPool::capacity();
     _index = (index + totalSize) % totalSize;
 }
 
-AudioBuffer
-AudioBuffer::clone()
+AudioDataAccessor
+AudioDataAccessor::clone()
 {
-    AudioBuffer buffer{_memoryPool};
-    buffer.seek(pos());
-    return buffer;
+    AudioDataAccessor copy{_memoryPool};
+    copy.seek(pos());
+    return copy;
 }

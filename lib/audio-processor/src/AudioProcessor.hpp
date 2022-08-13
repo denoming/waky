@@ -4,7 +4,7 @@
 
 #include <kissfft/kiss_fftr.h>
 
-class AudioBuffer;
+class AudioDataAccessor;
 
 class AudioProcessor final {
 public:
@@ -15,7 +15,7 @@ public:
     ~AudioProcessor();
 
     void
-    getSpectrogram(AudioBuffer& buffer, float* outputSpectrogram);
+    getSpectrogram(AudioDataAccessor& audioData, float* outputSpectrogram);
 
 private:
     void

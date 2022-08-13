@@ -2,7 +2,7 @@
 
 #include <driver/i2s.h>
 
-#include "AudioBuffer.hpp"
+#include "AudioDataAccessor.hpp"
 #include "AudioInputSampler.hpp"
 
 class MemsMicrophone final : public AudioInputSampler {
@@ -17,8 +17,8 @@ public:
     bool
     start(TaskHandle_t waiter) override;
 
-    AudioBuffer
-    buffer();
+    AudioDataAccessor
+    data();
 
 private:
     std::size_t
@@ -37,7 +37,7 @@ private:
     i2s_pin_config_t _pins;
     i2s_port_t _port;
     i2s_config_t _config;
-    AudioBuffer _buffer;
+    AudioDataAccessor _accessor;
     QueueHandle_t _queue;
     TaskHandle_t _waiter;
 };

@@ -35,10 +35,10 @@ DetectWakeWordState::run()
 {
     ESP_LOGD(TAG, "run()");
 
-    auto buffer = _sampler.buffer();
-    buffer.seek(buffer.pos() - CONFIG_JRVA_I2S_SAMPLE_RATE);
+    auto audioData = _sampler.data();
+    audioData.seek(audioData.pos() - CONFIG_JRVA_I2S_SAMPLE_RATE);
     float* inputBuffer = _nn->getInputBuffer();
-    _audioProcessor->getSpectrogram(buffer, inputBuffer);
+    _audioProcessor->getSpectrogram(audioData, inputBuffer);
     const float score = _nn->predict();
     if (score > 0.9) {
         ESP_LOGD(TAG, "Detected: %.2f", score);
