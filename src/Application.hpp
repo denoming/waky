@@ -1,15 +1,10 @@
 #pragma once
 
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
-
 #include "MemoryPool.hpp"
 #include "MemsMicrophone.hpp"
-#include "states/State.hpp"
+#include "Context.hpp"
 
-#include <memory>
-
-class Application {
+class Application : private Context {
 public:
     static Application&
     create();
@@ -32,8 +27,4 @@ private:
 private:
     MemoryPool _memory;
     MemsMicrophone _sampler;
-    std::unique_ptr<State> _detectionState;
-    std::unique_ptr<State> _recordingState;
-    State* _currentState;
-    TaskHandle_t _task;
 };
