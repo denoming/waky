@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Http.hpp"
+#include "HttpObserver.hpp"
 #include "Prinatble.hpp"
 
 #include <esp_http_client.h>
@@ -10,11 +11,13 @@ public:
     static const int kChunkConnection = -1;
     static const int kReadOnlyConnection = 0;
 
-    HttpClient();
+    HttpClient(HttpObserver& observer);
 
-    HttpClient(const char* host, const char* path);
+    HttpClient(HttpObserver& observer, const char* host, const char* path);
 
-    HttpClient(const char* host, unsigned short port, const char* path);
+    HttpClient(HttpObserver& observer, const char* host, unsigned short port, const char* path);
+
+    ~HttpClient();
 
     bool
     connected() const;
@@ -25,11 +28,11 @@ public:
     bool
     disconnect();
 
-    bool
-    cleanup();
-
     int
     fetchHeaders();
+
+    int
+    read(char* buffer, size_t size);
 
     int
     write(const char* data, size_t size) override;
@@ -49,17 +52,19 @@ public:
     int
     getStatusCode();
 
+protected:
+    HttpObserver&
+    observer();
+
 private:
     void
-    onConnect();
-
-    void
-    onDisconnect();
+    setConnectedStatus(bool status);
 
     static esp_err_t
     eventHandler(esp_http_client_event_t* event);
 
 private:
+    HttpObserver& _observer;
     bool _connected;
     esp_http_client_handle_t _handle;
 };

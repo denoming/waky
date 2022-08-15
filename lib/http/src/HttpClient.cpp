@@ -5,18 +5,22 @@
 
 static const char* TAG = "ESP32 JRVA - HttpClient";
 
-HttpClient::HttpClient()
-    : HttpClient{"127.0.0.1", 80, "/"}
+HttpClient::HttpClient(HttpObserver& observer)
+    : HttpClient{observer, "127.0.0.1", 80, "/"}
 {
 }
 
-HttpClient::HttpClient(const char* host, const char* path)
-    : HttpClient{host, 80, path}
+HttpClient::HttpClient(HttpObserver& observer, const char* host, const char* path)
+    : HttpClient{observer, host, 80, path}
 {
 }
 
-HttpClient::HttpClient(const char* host, unsigned short port, const char* path)
-    : _connected{false}
+HttpClient::HttpClient(HttpObserver& observer,
+                       const char* host,
+                       unsigned short port,
+                       const char* path)
+    : _observer{observer}
+    , _connected{false}
     , _handle{nullptr}
 {
     esp_http_client_config_t config = {};
@@ -27,7 +31,14 @@ HttpClient::HttpClient(const char* host, unsigned short port, const char* path)
     config.user_data = this;
     config.event_handler = eventHandler;
     _handle = esp_http_client_init(&config);
-    assert(_handle != nullptr);
+}
+
+HttpClient::~HttpClient()
+{
+    const auto error = esp_http_client_cleanup(_handle);
+    if (error != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to cleanup: %s", esp_err_to_name(error));
+    }
 }
 
 bool
@@ -58,21 +69,18 @@ HttpClient::disconnect()
     return true;
 }
 
-bool
-HttpClient::cleanup()
-{
-    const auto error = esp_http_client_cleanup(_handle);
-    if (error != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to cleanup: %s", esp_err_to_name(error));
-        return false;
-    }
-    return true;
-}
-
 int
 HttpClient::fetchHeaders()
 {
     return esp_http_client_fetch_headers(_handle);
+}
+
+int
+HttpClient::read(char* buffer, size_t size)
+{
+    assert(buffer != nullptr);
+    assert(size > 0);
+    return esp_http_client_read(_handle, buffer, size);
 }
 
 int
@@ -97,6 +105,7 @@ HttpClient::setMethod(esp_http_client_method_t method)
 bool
 HttpClient::setHeader(Http::Field field, const char* value)
 {
+    assert(_handle != nullptr);
     return esp_http_client_set_header(_handle, Http::toString(field), value);
 }
 
@@ -128,16 +137,16 @@ HttpClient::getStatusCode()
     return esp_http_client_get_status_code(_handle);
 }
 
-void
-HttpClient::onConnect()
+HttpObserver&
+HttpClient::observer()
 {
-    _connected = true;
+    return _observer;
 }
 
 void
-HttpClient::onDisconnect()
+HttpClient::setConnectedStatus(bool status)
 {
-    _connected = false;
+    _connected = status;
 }
 
 esp_err_t
@@ -147,11 +156,28 @@ HttpClient::eventHandler(esp_http_client_event_t* event)
     assert(self != nullptr);
 
     switch (event->event_id) {
+    case HTTP_EVENT_ERROR:
+        self->observer().onError(esp_http_client_get_errno(event->client));
+        break;
+    case HTTP_EVENT_HEADER_SENT:
+        self->observer().onHeaderSent();
+        break;
+    case HTTP_EVENT_ON_HEADER:
+        self->observer().onHeader(event->header_key, event->header_value);
+        break;
+    case HTTP_EVENT_ON_DATA:
+        self->observer().onData(event->data, event->data_len);
+        break;
+    case HTTP_EVENT_ON_FINISH:
+        self->observer().onFinish();
+        break;
     case HTTP_EVENT_ON_CONNECTED:
-        self->onConnect();
+        self->setConnectedStatus(true);
+        self->observer().onConnect();
         break;
     case HTTP_EVENT_DISCONNECTED:
-        self->onDisconnect();
+        self->setConnectedStatus(false);
+        self->observer().onDisconnect();
         break;
     default:
         break;

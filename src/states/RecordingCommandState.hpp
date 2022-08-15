@@ -1,12 +1,12 @@
 #pragma once
 
 #include "State.hpp"
-#include "HttpClient.hpp"
 
 #include <chrono>
 #include <memory>
 
 class MemsMicrophone;
+class AgentUploader;
 
 class RecordingCommandState : public State {
 public:
@@ -26,5 +26,5 @@ private:
     long _lastAudioPosition;
     std::chrono::steady_clock::time_point _startTime;
     std::chrono::steady_clock::duration _elapsedTime;
-    std::unique_ptr<HttpClient> _client;
+    std::unique_ptr<AgentUploader> _uploader;
 };
