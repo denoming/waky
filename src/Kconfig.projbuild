@@ -1,4 +1,40 @@
 menu "J.A.R.V.I.S Agent Configuration"
+
+    menu "Backend"
+        config JRVA_BACKEND_ADDR
+            string "Backend URL address"
+            default "api.jarvis.com"
+            help
+                J.A.R.V.I.S backend URL address
+
+        config JRVA_BACKEND_PORT
+            int "Backend port"
+            default 8000
+            help
+                J.A.R.V.I.S backend port number
+
+        config JRVA_BACKEND_PATH
+            string "Backend API path"
+            default "/speech"
+            help
+                J.A.R.V.I.S backend API path
+
+        config JRVA_BACKEND_TIMEOUT
+            int "Backend request timeout"
+            default 5000
+            range 1000 8000
+            help
+                J.A.R.V.I.S backend request timeout
+
+         config JRVA_BACKEND_CHUNK_SIZE
+            int "Backend chunk size"
+            default 1000
+            range 500 3000
+            help
+                J.A.R.V.I.S backend chunk size
+    endmenu
+
+
     menu "Memory pool"
         config JRVA_MEMPOOL_BUFFER_SIZE
             int "Memory pool buffer size"

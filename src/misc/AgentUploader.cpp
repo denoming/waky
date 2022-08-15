@@ -52,7 +52,7 @@ getResult(const char* str, std::size_t len, std::string& error)
 } // namespace
 
 AgentUploader::AgentUploader()
-    : _client{*this, "192.168.1.20", 8000, "/speech"}
+    : _client{*this, CONFIG_JRVA_BACKEND_ADDR, CONFIG_JRVA_BACKEND_PORT, CONFIG_JRVA_BACKEND_PATH}
     , _sender{_client}
 {
 }
@@ -71,7 +71,7 @@ AgentUploader::connect()
     _client.setHeader(Http::Field::Expect, "100-continue");
     _client.setHeader(Http::Field::UserAgent, "J.A.R.V.I.S Agent");
     _client.setMethod(HTTP_METHOD_POST);
-    _client.setTimeout(8000);
+    _client.setTimeout(CONFIG_JRVA_BACKEND_TIMEOUT);
 
     ESP_LOGD(TAG, "Create connection to backend server");
     return _client.connect(HttpClient::kChunkConnection);
@@ -88,7 +88,7 @@ AgentUploader::disconnect()
 std::size_t
 AgentUploader::upload(AudioDataAccessor audioData, long start, std::size_t count)
 {
-    static const std::size_t ChunkSize = 500u;
+    static const std::size_t ChunkSize = CONFIG_JRVA_BACKEND_CHUNK_SIZE;
 
     audioData.seek(start);
 
