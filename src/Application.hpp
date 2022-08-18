@@ -4,7 +4,7 @@
 #include "MemsMicrophone.hpp"
 #include "Context.hpp"
 
-class Application : private Context {
+class Application : public Context {
 public:
     static Application&
     create();

@@ -3,19 +3,18 @@
 #include "State.hpp"
 
 #include <chrono>
-#include <memory>
 
 class MemsMicrophone;
 class AgentUploader;
 
 class RecordingCommandState : public State {
 public:
-    RecordingCommandState(MemsMicrophone& sampler);
+    RecordingCommandState(Context& context, MemsMicrophone& sampler);
 
     void
     enterState() override;
 
-    bool
+    void
     run() override;
 
     void
@@ -23,8 +22,8 @@ public:
 
 private:
     MemsMicrophone& _sampler;
+    AgentUploader& _uploader;
     long _lastAudioPosition;
     std::chrono::steady_clock::time_point _startTime;
     std::chrono::steady_clock::duration _elapsedTime;
-    std::unique_ptr<AgentUploader> _uploader;
 };

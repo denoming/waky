@@ -57,6 +57,8 @@ AgentUploader::AgentUploader()
 {
 }
 
+AgentUploader::~AgentUploader() = default;
+
 bool
 AgentUploader::connected() const
 {

@@ -2,24 +2,26 @@
 
 #include "State.hpp"
 
-#include <memory>
-
+class Context;
 class NeuralNetwork;
 class AudioProcessor;
 class MemsMicrophone;
 
 class DetectWakeWordState : public State {
 public:
-    DetectWakeWordState(MemsMicrophone& sampler);
+    DetectWakeWordState(Context& context, MemsMicrophone& sampler);
 
-    void enterState() override;
+    void
+    enterState() override;
 
-    bool run() override;
+    void
+    run() override;
 
-    void exitState() override;
+    void
+    exitState() override;
 
 private:
     MemsMicrophone& _sampler;
-    std::unique_ptr<NeuralNetwork> _nn;
-    std::unique_ptr<AudioProcessor> _audioProcessor;
+    NeuralNetwork& _network;
+    AudioProcessor& _processor;
 };

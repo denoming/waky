@@ -8,6 +8,8 @@ class AgentUploader : private HttpObserver {
 public:
     AgentUploader();
 
+    ~AgentUploader();
+
     bool
     connected() const;
 

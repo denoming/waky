@@ -1,45 +1,46 @@
 #include "Context.hpp"
 
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
-
-#include "states/DetectWakeWordState.hpp"
-#include "states/RecordingCommandState.hpp"
+#include "NeuralNetwork.hpp"
+#include "AudioProcessor.hpp"
+#include "misc/AgentUploader.hpp"
 
 Context::Context()
-    : _state{nullptr}
+    : _neuralNetwork{new NeuralNetwork}
+    , _audioProcessor{new AudioProcessor}
+    , _uploader{new AgentUploader}
 {
+    _neuralNetwork->setUp();
+}
+
+Context::~Context()
+{
+    _neuralNetwork->tearDown();
 }
 
 void
-Context::proceed(MemsMicrophone& sampler)
+Context::proceed()
 {
-    static const TickType_t kMaxBlockTime = pdMS_TO_TICKS(100);
+    assert(_state);
+    _state->run();
+}
 
-    _detectionState.reset(new DetectWakeWordState{sampler});
-    _recordingState.reset(new RecordingCommandState{sampler});
+NeuralNetwork&
+Context::network()
+{
+    assert(_neuralNetwork);
+    return *_neuralNetwork;
+}
 
-    _state = _detectionState.get();
+AudioProcessor&
+Context::processor()
+{
+    assert(_audioProcessor);
+    return *_audioProcessor;
+}
 
-    assert(_state != nullptr);
-    _state->enterState();
-
-    while (true) {
-        const uint32_t notificationValue = ulTaskNotifyTake(pdTRUE, kMaxBlockTime);
-        if (notificationValue == 0) {
-            continue;
-        }
-
-        assert(_state != nullptr);
-        if (_state->run()) {
-            _state->exitState();
-            if (_state == _detectionState.get()) {
-                _state = _recordingState.get();
-            } else {
-                _state = _detectionState.get();
-            }
-            assert(_state != nullptr);
-            _state->enterState();
-        }
-    }
+AgentUploader&
+Context::uploader()
+{
+    assert(_uploader);
+    return *_uploader;
 }

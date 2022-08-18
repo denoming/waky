@@ -1,10 +1,29 @@
 #pragma once
 
+class Context;
+
 class State {
 public:
-    virtual void enterState() = 0;
+    State(Context& context);
 
-    virtual bool run() = 0;
-    
-    virtual void exitState() = 0;    
+    const Context&
+    context() const;
+
+    Context&
+    context();
+
+    virtual void
+    enterState()
+        = 0;
+
+    virtual void
+    run()
+        = 0;
+
+    virtual void
+    exitState()
+        = 0;
+
+private:
+    Context& _context;
 };

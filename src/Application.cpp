@@ -61,22 +61,33 @@ Application::start()
 void
 Application::main()
 {
+    static const TickType_t kMaxBlockTime = pdMS_TO_TICKS(100);
+
     ESP_LOGD(TAG, "Start audio listening");
     if (!_sampler.start(xTaskGetCurrentTaskHandle())) {
         ESP_LOGE(TAG, "Failed to start microphone listening");
-        return vTaskDelete(nullptr);
+        return;
     }
 
-    ESP_LOGD(TAG, "Start application loop");
-    proceed(_sampler);
+    ESP_LOGD(TAG, "Enter into default state");
+    setState<DetectWakeWordState>(_sampler);
 
-    vTaskDelete(nullptr);
+    ESP_LOGD(TAG, "Start application loop");
+    while (true) {
+        const uint32_t notificationValue = ulTaskNotifyTake(pdTRUE, kMaxBlockTime);
+        if (notificationValue > 0) {
+            proceed();
+        }
+    }
 }
 
 void
 Application::run(void* param)
 {
     assert(param != nullptr);
+
     Application* application = static_cast<Application*>(param);
     application->main();
+
+    vTaskDelete(nullptr);
 }
