@@ -1,6 +1,6 @@
 #include "DetectWakeWordState.hpp"
 
-#include "Context.hpp"
+#include "StateContext.hpp"
 #include "NeuralNetwork.hpp"
 #include "AudioProcessor.hpp"
 #include "MemsMicrophone.hpp"
@@ -11,7 +11,7 @@
 
 static const char* TAG = "ESP32 JRVA - DetectWakeWorkState";
 
-DetectWakeWordState::DetectWakeWordState(Context& context, MemsMicrophone& sampler)
+DetectWakeWordState::DetectWakeWordState(StateContext& context, MemsMicrophone& sampler)
     : State{context}
     , _sampler{sampler}
     , _network{context.network()}

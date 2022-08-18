@@ -3,8 +3,8 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
-#include "states/DetectWakeWordState.hpp"
-#include "states/RecordingCommandState.hpp"
+#include "state/DetectWakeWordState.hpp"
+#include "state/RecordingCommandState.hpp"
 #ifdef DEBUG
 #include "misc/Utils.hpp"
 #endif

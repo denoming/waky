@@ -1,19 +1,19 @@
 #include "State.hpp"
 
-#include "Context.hpp"
+#include "StateContext.hpp"
 
-State::State(Context& context)
+State::State(StateContext& context)
     : _context{context}
 {
 }
 
-const Context&
+const StateContext&
 State::context() const
 {
     return _context;
 }
 
-Context&
+StateContext&
 State::context()
 {
     return _context;

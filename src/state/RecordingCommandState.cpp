@@ -1,6 +1,6 @@
 #include "RecordingCommandState.hpp"
 
-#include "Context.hpp"
+#include "StateContext.hpp"
 #include "MemsMicrophone.hpp"
 #include "MemoryPool.hpp"
 #include "DetectWakeWordState.hpp"
@@ -15,7 +15,7 @@ static const long DEFAULT_POSITION{-1};
 
 using namespace std::chrono;
 
-RecordingCommandState::RecordingCommandState(Context& context, MemsMicrophone& sampler)
+RecordingCommandState::RecordingCommandState(StateContext& context, MemsMicrophone& sampler)
     : State{context}
     , _sampler{sampler}
     , _uploader{context.uploader()}

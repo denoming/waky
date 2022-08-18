@@ -1,6 +1,6 @@
 #pragma once
 
-#include "states/State.hpp"
+#include "state/State.hpp"
 
 #include <memory>
 
@@ -8,11 +8,11 @@ class AgentUploader;
 class NeuralNetwork;
 class AudioProcessor;
 
-class Context {
+class StateContext {
 public:
-    Context();
+    StateContext();
 
-    ~Context();
+    ~StateContext();
 
     template<typename S, typename... Args>
     void
@@ -39,7 +39,7 @@ private:
 
 template<typename S, typename... Args>
 void
-Context::setState(Args&&... args)
+StateContext::setState(Args&&... args)
 {
     if (_state) {
         _state->exitState();

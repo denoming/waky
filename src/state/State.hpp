@@ -1,15 +1,15 @@
 #pragma once
 
-class Context;
+class StateContext;
 
 class State {
 public:
-    State(Context& context);
+    State(StateContext& context);
 
-    const Context&
+    const StateContext&
     context() const;
 
-    Context&
+    StateContext&
     context();
 
     virtual void
@@ -25,5 +25,5 @@ public:
         = 0;
 
 private:
-    Context& _context;
+    StateContext& _context;
 };

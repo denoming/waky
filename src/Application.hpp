@@ -2,9 +2,9 @@
 
 #include "MemoryPool.hpp"
 #include "MemsMicrophone.hpp"
-#include "Context.hpp"
+#include "state/StateContext.hpp"
 
-class Application : public Context {
+class Application : public StateContext {
 public:
     static Application&
     create();

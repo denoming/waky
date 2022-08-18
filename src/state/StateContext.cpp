@@ -1,10 +1,10 @@
-#include "Context.hpp"
+#include "StateContext.hpp"
 
 #include "NeuralNetwork.hpp"
 #include "AudioProcessor.hpp"
 #include "misc/AgentUploader.hpp"
 
-Context::Context()
+StateContext::StateContext()
     : _neuralNetwork{new NeuralNetwork}
     , _audioProcessor{new AudioProcessor}
     , _uploader{new AgentUploader}
@@ -12,34 +12,34 @@ Context::Context()
     _neuralNetwork->setUp();
 }
 
-Context::~Context()
+StateContext::~StateContext()
 {
     _neuralNetwork->tearDown();
 }
 
 void
-Context::proceed()
+StateContext::proceed()
 {
     assert(_state);
     _state->run();
 }
 
 NeuralNetwork&
-Context::network()
+StateContext::network()
 {
     assert(_neuralNetwork);
     return *_neuralNetwork;
 }
 
 AudioProcessor&
-Context::processor()
+StateContext::processor()
 {
     assert(_audioProcessor);
     return *_audioProcessor;
 }
 
 AgentUploader&
-Context::uploader()
+StateContext::uploader()
 {
     assert(_uploader);
     return *_uploader;

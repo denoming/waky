@@ -9,7 +9,7 @@ class AgentUploader;
 
 class RecordingCommandState : public State {
 public:
-    RecordingCommandState(Context& context, MemsMicrophone& sampler);
+    RecordingCommandState(StateContext& context, MemsMicrophone& sampler);
 
     void
     enterState() override;

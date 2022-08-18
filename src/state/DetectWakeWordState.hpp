@@ -2,14 +2,14 @@
 
 #include "State.hpp"
 
-class Context;
+class StateContext;
 class NeuralNetwork;
 class AudioProcessor;
 class MemsMicrophone;
 
 class DetectWakeWordState : public State {
 public:
-    DetectWakeWordState(Context& context, MemsMicrophone& sampler);
+    DetectWakeWordState(StateContext& context, MemsMicrophone& sampler);
 
     void
     enterState() override;
