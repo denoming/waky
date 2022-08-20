@@ -2,40 +2,38 @@
 
 #include "NeuralNetwork.hpp"
 #include "AudioProcessor.hpp"
+#include "AudioDataAccessor.hpp"
 #include "misc/AgentUploader.hpp"
 
-StateContext::StateContext()
-    : _neuralNetwork{new NeuralNetwork}
-    , _audioProcessor{new AudioProcessor}
-    , _uploader{new AgentUploader}
-{
-    _neuralNetwork->setUp();
-}
+StateContext::~StateContext() = default;
 
-StateContext::~StateContext()
+bool
+StateContext::setup()
 {
-    _neuralNetwork->tearDown();
-}
+    _network.reset(new NeuralNetwork);
+    _processor.reset(new AudioProcessor);
+    _uploader.reset(new AgentUploader);
 
-void
-StateContext::proceed()
-{
-    assert(_state);
-    _state->run();
+    assert(_network);
+    if (!_network->setUp()) {
+        return false;
+    }
+
+    return true;
 }
 
 NeuralNetwork&
 StateContext::network()
 {
-    assert(_neuralNetwork);
-    return *_neuralNetwork;
+    assert(_network);
+    return *_network;
 }
 
 AudioProcessor&
 StateContext::processor()
 {
-    assert(_audioProcessor);
-    return *_audioProcessor;
+    assert(_processor);
+    return *_processor;
 }
 
 AgentUploader&
@@ -43,4 +41,11 @@ StateContext::uploader()
 {
     assert(_uploader);
     return *_uploader;
+}
+
+void
+StateContext::proceed()
+{
+    assert(_state);
+    _state->run();
 }

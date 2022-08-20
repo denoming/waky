@@ -5,6 +5,9 @@
 
 #include "state/DetectWakeWordState.hpp"
 #include "state/RecordingCommandState.hpp"
+#include "NeuralNetwork.hpp"
+#include "AudioProcessor.hpp"
+#include "misc/AgentUploader.hpp"
 #ifdef DEBUG
 #include "misc/Utils.hpp"
 #endif
@@ -29,9 +32,19 @@ Application::Application()
 {
 }
 
+Application::~Application() = default;
+
 bool
 Application::setup()
 {
+    if (_context.setup()) {
+        ESP_LOGD(TAG, "Enter into default state");
+        _context.setState<DetectWakeWordState>(_sampler);
+    } else {
+        ESP_LOGE(TAG, "Failed to setup context");
+        return false;
+    }
+
     ESP_LOGD(TAG, "Allocate memory for memory pool");
     if (!_memory.allocate()) {
         ESP_LOGE(TAG, "Failed to allocate memory for memory pool");
@@ -51,11 +64,13 @@ Application::start()
     static const auto kTaskStackDepth = 4096u;
     static const auto kTaskPriority = (tskIDLE_PRIORITY + 1) | portPRIVILEGE_BIT;
 
-    auto rv = xTaskCreate(&run, "Application Task", kTaskStackDepth, this, kTaskPriority, nullptr);
+    const auto rv = xTaskCreate(&run, "Application Task", kTaskStackDepth, this, kTaskPriority, nullptr);
     if (rv != pdPASS) {
         ESP_LOGE(TAG, "Failed to create application task");
         return;
     }
+
+    ESP_LOGD(TAG, "Application task was created successfully");
 }
 
 void
@@ -69,14 +84,11 @@ Application::main()
         return;
     }
 
-    ESP_LOGD(TAG, "Enter into default state");
-    setState<DetectWakeWordState>(_sampler);
-
     ESP_LOGD(TAG, "Start application loop");
     while (true) {
         const uint32_t notificationValue = ulTaskNotifyTake(pdTRUE, kMaxBlockTime);
         if (notificationValue > 0) {
-            proceed();
+            _context.proceed();
         }
     }
 }

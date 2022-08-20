@@ -4,10 +4,14 @@
 #include "MemsMicrophone.hpp"
 #include "state/StateContext.hpp"
 
-class Application : public StateContext {
+#include <memory>
+
+class Application {
 public:
     static Application&
     create();
+
+    ~Application();
 
     bool
     setup();
@@ -25,6 +29,7 @@ private:
     run(void* param);
 
 private:
+    StateContext _context;
     MemoryPool _memory;
     MemsMicrophone _sampler;
 };

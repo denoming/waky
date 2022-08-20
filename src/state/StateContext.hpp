@@ -4,19 +4,21 @@
 
 #include <memory>
 
-class AgentUploader;
 class NeuralNetwork;
 class AudioProcessor;
+class AgentUploader;
+class AudioDataAccessor;
 
 class StateContext {
 public:
-    StateContext();
-
     ~StateContext();
 
     template<typename S, typename... Args>
     void
     setState(Args&&... args);
+
+    bool
+    setup();
 
     NeuralNetwork&
     network();
@@ -32,8 +34,8 @@ public:
 
 private:
     std::unique_ptr<State> _state;
-    std::unique_ptr<NeuralNetwork> _neuralNetwork;
-    std::unique_ptr<AudioProcessor> _audioProcessor;
+    std::unique_ptr<NeuralNetwork> _network;
+    std::unique_ptr<AudioProcessor> _processor;
     std::unique_ptr<AgentUploader> _uploader;
 };
 
