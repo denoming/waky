@@ -1,10 +1,10 @@
 #include "DetectWakeWordState.hpp"
 
 #include "StateContext.hpp"
-#include "NeuralNetwork.hpp"
-#include "AudioProcessor.hpp"
-#include "MemsMicrophone.hpp"
 #include "RecordingCommandState.hpp"
+#include "nn/NeuralNetwork.hpp"
+#include "audio-processor/AudioProcessor.hpp"
+#include "audio-input/MemsMicrophone.hpp"
 
 #include <esp_err.h>
 #include <esp_log.h>

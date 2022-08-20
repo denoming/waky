@@ -1,6 +1,6 @@
 #pragma once
 
-#include "HammingWindow.hpp"
+#include "audio-processor/HammingWindow.hpp"
 
 #include <kissfft/kiss_fftr.h>
 

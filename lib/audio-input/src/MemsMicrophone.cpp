@@ -1,6 +1,6 @@
-#include "MemsMicrophone.hpp"
+#include "audio-input/MemsMicrophone.hpp"
 
-#include "MemoryPool.hpp"
+#include "audio-input/MemoryPool.hpp"
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>

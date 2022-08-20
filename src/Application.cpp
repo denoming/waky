@@ -5,9 +5,9 @@
 
 #include "state/DetectWakeWordState.hpp"
 #include "state/RecordingCommandState.hpp"
-#include "NeuralNetwork.hpp"
-#include "AudioProcessor.hpp"
-#include "misc/AgentUploader.hpp"
+#include "nn/NeuralNetwork.hpp"
+#include "audio-processor/AudioProcessor.hpp"
+#include "http/AgentUploader.hpp"
 #ifdef DEBUG
 #include "misc/Utils.hpp"
 #endif
@@ -64,7 +64,8 @@ Application::start()
     static const auto kTaskStackDepth = 4096u;
     static const auto kTaskPriority = (tskIDLE_PRIORITY + 1) | portPRIVILEGE_BIT;
 
-    const auto rv = xTaskCreate(&run, "Application Task", kTaskStackDepth, this, kTaskPriority, nullptr);
+    const auto rv
+        = xTaskCreate(&run, "Application Task", kTaskStackDepth, this, kTaskPriority, nullptr);
     if (rv != pdPASS) {
         ESP_LOGE(TAG, "Failed to create application task");
         return;

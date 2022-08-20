@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Http.hpp"
-#include "HttpObserver.hpp"
-#include "Prinatble.hpp"
+#include "http/Http.hpp"
+#include "http/HttpObserver.hpp"
+#include "http/Prinatble.hpp"
 
 #include <esp_http_client.h>
 

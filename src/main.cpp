@@ -1,11 +1,11 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
 
-#include "WiFi.hpp"
-#include "Application.hpp"
+#include "wifi/WiFi.hpp"
 #ifdef DEBUG
 #include "misc/Utils.hpp"
 #endif
+#include "Application.hpp"
 
 #include <esp_err.h>
 #include <esp_log.h>

@@ -1,6 +1,6 @@
-#include "AudioProcessor.hpp"
+#include "audio-processor/AudioProcessor.hpp"
 
-#include "AudioDataAccessor.hpp"
+#include "audio-input/AudioDataAccessor.hpp"
 
 #include <cfloat>
 

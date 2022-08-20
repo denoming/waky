@@ -1,7 +1,7 @@
-#include "AgentUploader.hpp"
+#include "http/AgentUploader.hpp"
 
-#include "HttpClient.hpp"
-#include "HttpChunkSender.hpp"
+#include "http/HttpClient.hpp"
+#include "http/HttpChunkSender.hpp"
 
 #include <esp_assert.h>
 #include <esp_err.h>

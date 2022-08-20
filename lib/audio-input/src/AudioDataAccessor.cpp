@@ -1,8 +1,8 @@
-#include "AudioDataAccessor.hpp"
+#include "audio-input/AudioDataAccessor.hpp"
 
 #include <esp_assert.h>
 
-#include "MemoryPool.hpp"
+#include "audio-input/MemoryPool.hpp"
 
 AudioDataAccessor::AudioDataAccessor(MemoryPool& memoryPool)
     : _memoryPool{memoryPool}

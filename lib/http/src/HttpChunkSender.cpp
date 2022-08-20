@@ -1,6 +1,6 @@
-#include "HttpChunkSender.hpp"
+#include "http/HttpChunkSender.hpp"
 
-#include "HttpClient.hpp"
+#include "http/HttpClient.hpp"
 
 HttpChunkSender::HttpChunkSender(HttpClient& client)
     : _client{client}

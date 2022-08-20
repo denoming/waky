@@ -1,10 +1,10 @@
 #include "RecordingCommandState.hpp"
 
 #include "StateContext.hpp"
-#include "MemsMicrophone.hpp"
-#include "MemoryPool.hpp"
 #include "DetectWakeWordState.hpp"
-#include "misc/AgentUploader.hpp"
+#include "audio-input/MemsMicrophone.hpp"
+#include "audio-input/MemoryPool.hpp"
+#include "http/AgentUploader.hpp"
 
 #include <esp_err.h>
 #include <esp_log.h>

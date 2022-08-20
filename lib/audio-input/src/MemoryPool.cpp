@@ -1,4 +1,4 @@
-#include "MemoryPool.hpp"
+#include "audio-input/MemoryPool.hpp"
 
 #include <esp_log.h>
 #include <esp_system.h>

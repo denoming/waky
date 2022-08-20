@@ -2,8 +2,8 @@
 
 #include <driver/i2s.h>
 
-#include "AudioDataAccessor.hpp"
-#include "AudioInputSampler.hpp"
+#include "audio-input/AudioDataAccessor.hpp"
+#include "audio-input/AudioInputSampler.hpp"
 
 class MemsMicrophone final : public AudioInputSampler {
 public:

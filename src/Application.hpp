@@ -1,7 +1,7 @@
 #pragma once
 
-#include "MemoryPool.hpp"
-#include "MemsMicrophone.hpp"
+#include "audio-input/MemoryPool.hpp"
+#include "audio-input/MemsMicrophone.hpp"
 #include "state/StateContext.hpp"
 
 #include <memory>

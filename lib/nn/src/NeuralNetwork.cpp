@@ -1,6 +1,6 @@
-#include "NeuralNetwork.hpp"
+#include "nn/NeuralNetwork.hpp"
 
-#include "Model.hpp"
+#include "nn/Model.hpp"
 
 #include <tensorflow/lite/micro/all_ops_resolver.h>
 #include <tensorflow/lite/micro/micro_error_reporter.h>

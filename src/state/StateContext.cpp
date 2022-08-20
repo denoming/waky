@@ -1,9 +1,9 @@
 #include "StateContext.hpp"
 
-#include "NeuralNetwork.hpp"
-#include "AudioProcessor.hpp"
-#include "AudioDataAccessor.hpp"
-#include "misc/AgentUploader.hpp"
+#include "nn/NeuralNetwork.hpp"
+#include "audio-processor/AudioProcessor.hpp"
+#include "audio-input/AudioDataAccessor.hpp"
+#include "http/AgentUploader.hpp"
 
 StateContext::~StateContext() = default;
 

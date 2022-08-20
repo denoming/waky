@@ -1,4 +1,4 @@
-#include "WiFi.hpp"
+#include "wifi/WiFi.hpp"
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/event_groups.h>

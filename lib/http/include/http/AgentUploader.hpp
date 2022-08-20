@@ -1,8 +1,8 @@
 #pragma once
 
-#include "AudioDataAccessor.hpp"
-#include "HttpClient.hpp"
-#include "HttpChunkSender.hpp"
+#include "audio-input/AudioDataAccessor.hpp"
+#include "http/HttpClient.hpp"
+#include "http/HttpChunkSender.hpp"
 
 class AgentUploader : private HttpObserver {
 public:
