@@ -3,9 +3,9 @@
 #ifdef DEBUG
 #include <esp_err.h>
 #include <esp_log.h>
-#endif
 
 static const char* TAG = "ESP32 JRVA - HttpObserver";
+#endif
 
 void
 HttpObserver::onError(int error)
