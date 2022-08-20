@@ -61,7 +61,7 @@ Application::setup()
 void
 Application::start()
 {
-    static const auto kTaskStackDepth = 4096u;
+    static const auto kTaskStackDepth = 3072u;
     static const auto kTaskPriority = (tskIDLE_PRIORITY + 1) | portPRIVILEGE_BIT;
 
     const auto rv
@@ -78,6 +78,10 @@ void
 Application::main()
 {
     static const TickType_t kMaxBlockTime = pdMS_TO_TICKS(100);
+
+#ifdef DEBUG
+    printStackInfo(TAG, "Before listening");
+#endif
 
     ESP_LOGD(TAG, "Start audio listening");
     if (!_sampler.start(xTaskGetCurrentTaskHandle())) {

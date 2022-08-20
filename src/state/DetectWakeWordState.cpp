@@ -5,6 +5,9 @@
 #include "nn/NeuralNetwork.hpp"
 #include "audio-processor/AudioProcessor.hpp"
 #include "audio-input/MemsMicrophone.hpp"
+#ifdef DEBUG
+#include "misc/Utils.hpp"
+#endif
 
 #include <esp_err.h>
 #include <esp_log.h>
@@ -37,6 +40,9 @@ DetectWakeWordState::run()
     const float score = _network.predict();
     if (score > 0.9) {
         ESP_LOGD(TAG, "Detected: %.2f", score);
+#ifdef DEBUG
+        printStackInfo(TAG, "After wake word detected");
+#endif
         return context().setState<RecordingCommandState>(_sampler);
     }
 }

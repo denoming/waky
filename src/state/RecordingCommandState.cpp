@@ -5,6 +5,9 @@
 #include "audio-input/MemsMicrophone.hpp"
 #include "audio-input/MemoryPool.hpp"
 #include "http/AgentUploader.hpp"
+#ifdef DEBUG
+#include "misc/Utils.hpp"
+#endif
 
 #include <esp_err.h>
 #include <esp_log.h>
@@ -66,6 +69,9 @@ RecordingCommandState::run()
             ESP_LOGD(TAG, "Get recognition result");
             const bool result = _uploader.finalize(3000);
             ESP_LOGD(TAG, "Recognition result: %s", result ? "true" : "false");
+#ifdef DEBUG
+            printStackInfo(TAG, "After audio uploading");
+#endif
             return context().setState<DetectWakeWordState>(_sampler);
         }
     }

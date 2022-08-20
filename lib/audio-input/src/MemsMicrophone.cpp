@@ -8,6 +8,10 @@
 #include <esp_log.h>
 #include <esp_assert.h>
 
+#ifdef DEBUG
+#include "misc/Utils.hpp"
+#endif
+
 static const char* TAG = "ESP32 TFLITE WWD - MM";
 
 static const i2s_config_t I2S_CONFIG = {
@@ -56,7 +60,7 @@ bool
 MemsMicrophone::start(TaskHandle_t waiter)
 {
     static const int kQueueSize = 8;
-    static const uint32_t kTaskStackDepth = 4096u;
+    static const uint32_t kTaskStackDepth = 2048u;
     static const UBaseType_t kTaskPriority
         = UBaseType_t((tskIDLE_PRIORITY + 1) | portPRIVILEGE_BIT);
 
@@ -130,8 +134,11 @@ MemsMicrophone::pullDataTask(void* param)
     assert(param != nullptr);
     MemsMicrophone* mic = static_cast<MemsMicrophone*>(param);
 
+    static uint8_t buffer[kBufferSize];
+#ifdef DEBUG
+    printStackInfo(TAG, "Before pulling of data");
+#endif
     std::size_t totalBytes{0};
-    uint8_t buffer[kBufferSize];
     while (true) {
         std::size_t bytesRead{0};
         bytesRead = mic->pullData(buffer, kBufferSize);
