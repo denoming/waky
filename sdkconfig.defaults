@@ -3,3 +3,16 @@
 #
 CONFIG_ESP_TASK_WDT=n
 # end of ESP System Settings
+
+#
+# Wi-Fi
+#
+CONFIG_ESP32_WIFI_ENABLE_WPA3_SAE=n
+CONFIG_ESP_WIFI_SOFTAP_SUPPORT=n
+# end of Wi-Fi
+
+#
+# LWIP
+#
+CONFIG_LWIP_IPV6=n
+# end of LWIP
