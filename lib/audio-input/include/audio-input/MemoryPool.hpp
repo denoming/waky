@@ -1,6 +1,9 @@
 #pragma once
 
+#include <cstdint>
 #include <array>
+
+#include "sdkconfig.h"
 
 class MemoryPool final {
 public:

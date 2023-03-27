@@ -1,6 +1,7 @@
 #include "http/Http.hpp"
 
 #include <array>
+#include <cassert>
 
 static std::array<const char*, 3> Headers = {
     "Expect",

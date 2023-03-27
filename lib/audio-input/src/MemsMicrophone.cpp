@@ -17,10 +17,10 @@ static const char* TAG = "ESP32 TFLITE WWD - MM";
 static const i2s_config_t I2S_CONFIG = {
     .mode = (i2s_mode_t) (I2S_MODE_MASTER | I2S_MODE_RX),
     .sample_rate = CONFIG_JRVA_I2S_SAMPLE_RATE,
-    .bits_per_sample = I2S_BITS_PER_SAMPLE_32BIT,
+    .bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT,
     .channel_format = I2S_CHANNEL_FMT_ONLY_LEFT,
     .communication_format = I2S_COMM_FORMAT_STAND_I2S,
-    .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1,
+    .intr_alloc_flags = ESP_INTR_FLAG_LEVEL2,
     .dma_buf_count = CONFIG_JRVA_I2S_DMA_BUFFER_COUNT,
     .dma_buf_len = CONFIG_JRVA_I2S_DMA_BUFFER_SIZE,
     .use_apll = false,
@@ -74,6 +74,11 @@ MemsMicrophone::start(TaskHandle_t waiter)
         return false;
     }
 
+    if (i2s_set_clk(_port, CONFIG_JRVA_I2S_SAMPLE_RATE, I2S_BITS_PER_SAMPLE_16BIT, I2S_CHANNEL_MONO) != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to set I2S clock config");
+        return false;
+    }
+
     _waiter = waiter;
     const auto rv = xTaskCreate(&MemsMicrophone::pullDataTask,
                                 "MEMS microphone pull data task",
@@ -114,12 +119,10 @@ MemsMicrophone::pullData(uint8_t* buffer, std::size_t size)
 void
 MemsMicrophone::processData(const uint8_t* buffer, std::size_t size)
 {
-    static const int kDataBitShift = 11;
-
-    const auto* samples = reinterpret_cast<const int32_t*>(buffer);
+    const auto* samples = reinterpret_cast<const int16_t*>(buffer);
     assert(samples != nullptr);
-    for (int i = 0; i < size / sizeof(int32_t); ++i) {
-        _accessor.put(samples[i] >> kDataBitShift);
+    for (int i = 0; i < size / sizeof(int16_t); ++i) {
+        _accessor.put(samples[i]);
     }
 }
 
