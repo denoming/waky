@@ -1,28 +1,44 @@
 # J.A.R.V.I.S
 
-## Build
+# Introduction
 
-1. Clone TensorFlowLite component
+J.A.R.V.I.S Agent is an applciation reponsible to detect pre-configured word ("Marvin"), record a speech and send to backend for further processing.
 
-```sh
-$ git clone --recurse-submodules https://github.com/espressif/tflite-micro-esp-examples.git $HOME/tflite-micro
-$ cd <project-path>
-$ mkdir -p components && cd components
-$ ln -s $HOME/tflite-micro/components/tflite-lib tflite-lib
-$ ln -s $HOME/tflite-micro/components/esp-nn esp-nn
-```
+# Dependencies
+
+* ESP-IDF (ver. 4.4.3)
+* TensorFlow Lite Micro ([repository](https://github.com/espressif/tflite-micro-esp-examples.git))
+* KissFFT ([repository](https://github.com/karz0n/esp32-kissfft.git))
+
 Note: The TensorFlow Lite component is responsible for recognizing wake word using trained model and gistogram of recorded sound.
 
-2. Clone KissFFT component
-
-```sh
-$ git clone https://github.com/karz0n/esp32-kissfft.git $HOME/kissfft
-$ cd <project-path>
-$ mkdir -p components && cd components
-$ ln -s $HOME/kissfft kissfft
-```
 Note: The KissFFT component is responsible for making gistogram of recorded sound.
 
-3. Build
+# Prepare
 
-TBD
+* Install [Visual Studio Code](https://code.visualstudio.com/) IDE
+* Install [PlatformIO IDE](https://platformio.org/platformio-ide)
+* Open IDE and pre-install ESP-IDF with particular version
+
+# Configure
+
+* Open project in IDE
+* On the left panel click on PlatformIDE icon
+* Click on "PlatformIO Core CLI"
+* Run command:
+```shell
+$ pio run -t menuconfig
+```
+* Apply configuration (see J.A.R.V.I.S Agent Configuration)
+
+Note: Usually you might need to change "Backend" configuration (URL address and port). Any other configration is not needed.
+
+# Build
+
+* Clone dependencies using helpfull script:
+```shell
+$ cd <project-path>
+$ bash scripts/setup.sh
+```
+* Open project in IDE
+* Build

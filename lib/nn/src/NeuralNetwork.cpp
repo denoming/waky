@@ -3,7 +3,6 @@
 #include "nn/Model.hpp"
 
 #include <tensorflow/lite/micro/all_ops_resolver.h>
-#include <tensorflow/lite/micro/micro_error_reporter.h>
 #include <tensorflow/lite/micro/micro_interpreter.h>
 #include <tensorflow/lite/schema/schema_generated.h>
 
@@ -19,11 +18,9 @@ NeuralNetwork::NeuralNetwork()
     , _model{nullptr}
     , _resolver{nullptr}
     , _interpreter{nullptr}
-    , _reporter{nullptr}
     , _input{nullptr}
     , _output{nullptr}
 {
-    _reporter = tflite::GetMicroErrorReporter();
 }
 
 bool
@@ -63,7 +60,7 @@ NeuralNetwork::setUp()
     _resolver->AddDequantize();
 
     _interpreter = new (std::nothrow)
-        tflite::MicroInterpreter(_model, *_resolver, _arena, kArenaSize, _reporter);
+        tflite::MicroInterpreter(_model, *_resolver, _arena, kArenaSize);
     if (_interpreter == nullptr) {
         ESP_LOGE(TAG, "Failed to instantiate interpreter");
         return false;
