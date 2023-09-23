@@ -2,7 +2,7 @@
 
 #include "nn/Model.hpp"
 
-#include <tensorflow/lite/micro/all_ops_resolver.h>
+#include <tensorflow/lite/micro/micro_mutable_op_resolver.h>
 #include <tensorflow/lite/micro/micro_interpreter.h>
 #include <tensorflow/lite/schema/schema_generated.h>
 
@@ -40,7 +40,7 @@ NeuralNetwork::setUp()
         _model = tflite::GetModel(TF_MODEL);
         if (_model->version() != TFLITE_SCHEMA_VERSION) {
             ESP_LOGE(TAG,
-                     "Invalid model <%d> while <%d> expected",
+                     "Invalid model <%lu> while <%d> expected",
                      _model->version(),
                      TFLITE_SCHEMA_VERSION);
             _model = nullptr;

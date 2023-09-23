@@ -11,7 +11,7 @@ printHeapInfo(const char* tag, const char* prefix)
 {
     const auto freeHeap = esp_get_free_heap_size();
     ESP_LOGI(tag, "=== %s ===", prefix);
-    ESP_LOGI(tag, "Heap memory info: free <%d> bytes", freeHeap);
+    ESP_LOGI(tag, "Heap memory info: free <%lu> bytes", freeHeap);
     ESP_LOGI(tag, "=== %s ===", prefix);
 }
 
