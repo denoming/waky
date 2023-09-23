@@ -1,18 +1,16 @@
-#
-# ESP System Settings
-#
-CONFIG_ESP_TASK_WDT=n
-# end of ESP System Settings
+# Disable color output (wrong output colors sometimes)
+CONFIG_LOG_COLORS=n
 
-#
-# Wi-Fi
-#
-CONFIG_ESP32_WIFI_ENABLE_WPA3_SAE=n
-CONFIG_ESP_WIFI_SOFTAP_SUPPORT=n
-# end of Wi-Fi
+# Config ESP32 CPU frequency
+CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240=y
 
-#
-# LWIP
-#
-CONFIG_LWIP_IPV6=n
-# end of LWIP
+# Config ESP32 Tool
+CONFIG_ESPTOOLPY_FLASHFREQ_80M=y
+CONFIG_ESPTOOLPY_FLASHMODE_QIO=y
+CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y
+
+# Increase FreeRTOS clock frequency
+CONFIG_FREERTOS_HZ=1000
+
+# Disable task watchdog by default (suppress warnings due to recognizing)
+CONFIG_ESP_TASK_WDT_EN=n
