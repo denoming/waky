@@ -2,6 +2,8 @@
 
 class HttpObserver {
 public:
+    virtual ~HttpObserver() = default;
+
     virtual void
     onError(int error);
 

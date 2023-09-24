@@ -6,6 +6,8 @@ class State {
 public:
     State(StateContext& context);
 
+    virtual ~State() = default;
+
     const StateContext&
     context() const;
 
