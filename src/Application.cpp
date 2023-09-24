@@ -17,36 +17,50 @@
 
 static const char* TAG = "ESP32 JRVA - Application";
 
-Application&
-Application::create()
-{
-    static std::unique_ptr<Application> instance;
-    if (!instance) {
-        instance.reset(new Application);
-    }
-    return *instance;
-}
+class ApplicationImpl {
+public:
+    ApplicationImpl() = default;
 
-Application::Application()
-    : _sampler{_memory}
-{
-}
+    bool
+    setup();
 
-Application::~Application() = default;
+    void
+    start();
+
+private:
+    void
+    main();
+
+    static void
+    run(void* param);
+
+private:
+    std::unique_ptr<StateContext> _context;
+    std::unique_ptr<MemoryPool> _memoryPool;
+    std::unique_ptr<MemsMicrophone> _sampler;
+};
 
 bool
-Application::setup()
+ApplicationImpl::setup()
 {
-    if (_context.setup()) {
+    _context = std::make_unique<StateContext>();
+    _memoryPool = std::make_unique<MemoryPool>();
+    _sampler = std::make_unique<MemsMicrophone>(*_memoryPool);
+
+    if (_context->setup()) {
+#ifdef DEBUG
         ESP_LOGD(TAG, "Enter into default state");
-        _context.setState<DetectWakeWordState>(_sampler);
+#endif
+        _context->setState<DetectWakeWordState>(*_sampler);
     } else {
         ESP_LOGE(TAG, "Failed to setup context");
         return false;
     }
 
+#ifdef DEBUG
     ESP_LOGD(TAG, "Allocate memory for memory pool");
-    if (!_memory.allocate()) {
+#endif
+    if (!_memoryPool->allocate()) {
         ESP_LOGE(TAG, "Failed to allocate memory for memory pool");
         return false;
     }
@@ -59,23 +73,24 @@ Application::setup()
 }
 
 void
-Application::start()
+ApplicationImpl::start()
 {
     static const auto kTaskStackDepth = 3072u;
     static const auto kTaskPriority = (tskIDLE_PRIORITY + 1) | portPRIVILEGE_BIT;
 
-    const auto rv
-        = xTaskCreate(&run, "Application Task", kTaskStackDepth, this, kTaskPriority, nullptr);
+    const auto rv = xTaskCreate(&run, "APP_TASK", kTaskStackDepth, this, kTaskPriority, nullptr);
     if (rv != pdPASS) {
         ESP_LOGE(TAG, "Failed to create application task");
         return;
     }
 
+#ifdef DEBUG
     ESP_LOGD(TAG, "Application task was created successfully");
+#endif
 }
 
 void
-Application::main()
+ApplicationImpl::main()
 {
     static const TickType_t kMaxBlockTime = pdMS_TO_TICKS(100);
 
@@ -83,28 +98,57 @@ Application::main()
     printStackInfo(TAG, "Before listening");
 #endif
 
+#ifdef DEBUG
     ESP_LOGD(TAG, "Start audio listening");
-    if (!_sampler.start(xTaskGetCurrentTaskHandle())) {
+#endif
+    ESP_LOGI(TAG, "Start audio listening");
+    if (!_sampler->start(xTaskGetCurrentTaskHandle())) {
         ESP_LOGE(TAG, "Failed to start microphone listening");
         return;
     }
 
+#ifdef DEBUG
     ESP_LOGD(TAG, "Start application loop");
+#endif
+    ESP_LOGI(TAG, "Start application loop");
     while (true) {
-        const uint32_t notificationValue = ulTaskNotifyTake(pdTRUE, kMaxBlockTime);
-        if (notificationValue > 0) {
-            _context.proceed();
+        if (ulTaskNotifyTake(pdTRUE, kMaxBlockTime) > 0 /* notification value after reset */) {
+            _context->proceed();
         }
     }
 }
 
 void
-Application::run(void* param)
+ApplicationImpl::run(void* param)
 {
-    assert(param != nullptr);
-
-    Application* application = static_cast<Application*>(param);
-    application->main();
+    auto* impl = static_cast<ApplicationImpl*>(param);
+    assert(impl != nullptr);
+    impl->main();
 
     vTaskDelete(nullptr);
+}
+
+Application::Application()
+{
+    static ApplicationImpl impl;
+    _impl = &impl;
+}
+
+Application::~Application()
+{
+    _impl = nullptr;
+}
+
+bool
+Application::setup()
+{
+    assert(_impl != nullptr);
+    return _impl->setup();
+}
+
+void
+Application::start()
+{
+    assert(_impl != nullptr);
+    return _impl->start();
 }

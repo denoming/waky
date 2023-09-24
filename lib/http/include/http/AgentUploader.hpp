@@ -4,26 +4,26 @@
 #include "http/HttpClient.hpp"
 #include "http/HttpChunkSender.hpp"
 
-class AgentUploader : private HttpObserver {
+class AgentUploader final : private HttpObserver {
 public:
     AgentUploader();
 
-    ~AgentUploader();
+    ~AgentUploader() final;
 
-    bool
+    [[nodiscard]] bool
     connected() const;
 
-    bool
+    [[nodiscard]] bool
     connect();
 
     void
     disconnect();
 
-    std::size_t
-    upload(AudioDataAccessor audioData, long start, std::size_t count);
+    [[nodiscard]] size_t
+    upload(AudioDataAccessor audioData, long start, size_t count);
 
-    bool
-    finalize(std::int32_t timeout);
+    [[nodiscard]] bool
+    finalize(int32_t timeout);
 
 private:
     HttpClient _client;

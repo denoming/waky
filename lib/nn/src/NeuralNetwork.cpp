@@ -2,16 +2,12 @@
 
 #include "nn/Model.hpp"
 
-#include <tensorflow/lite/micro/micro_mutable_op_resolver.h>
-#include <tensorflow/lite/micro/micro_interpreter.h>
-#include <tensorflow/lite/schema/schema_generated.h>
-
 #include <esp_err.h>
 #include <esp_log.h>
 
 static const int kArenaSize = 25000;
 
-static const char* TAG = "ESP32 JRVA - NN";
+static const char* TAG = "ESP32 - NN";
 
 NeuralNetwork::NeuralNetwork()
     : _arena{nullptr}
@@ -27,16 +23,14 @@ bool
 NeuralNetwork::setUp()
 {
     if (!_arena) {
-        ESP_LOGD(TAG, "Allocate memory for arane: %d size", kArenaSize);
         _arena = new (std::nothrow) uint8_t[kArenaSize];
-        if (_arena == nullptr) {
+        if (!_arena) {
             ESP_LOGE(TAG, "Failed to allocate memory for arena");
             return false;
         }
     }
 
-    if (_model == nullptr) {
-        ESP_LOGD(TAG, "Load prediction model");
+    if (!_model) {
         _model = tflite::GetModel(TF_MODEL);
         if (_model->version() != TFLITE_SCHEMA_VERSION) {
             ESP_LOGE(TAG,
@@ -59,9 +53,9 @@ NeuralNetwork::setUp()
     _resolver->AddQuantize();
     _resolver->AddDequantize();
 
-    _interpreter = new (std::nothrow)
-        tflite::MicroInterpreter(_model, *_resolver, _arena, kArenaSize);
-    if (_interpreter == nullptr) {
+    _interpreter
+        = new (std::nothrow) tflite::MicroInterpreter(_model, *_resolver, _arena, kArenaSize);
+    if (!_interpreter) {
         ESP_LOGE(TAG, "Failed to instantiate interpreter");
         return false;
     }
@@ -88,10 +82,6 @@ NeuralNetwork::tearDown()
 
     delete _interpreter;
     delete _resolver;
-    delete _arena;
-
-    _arena = nullptr;
-    _model = nullptr;
 }
 
 float*

@@ -18,7 +18,7 @@ static const char* TAG = "ESP32 JRVA - AgentUploader";
 namespace {
 
 bool
-getResult(const char* str, std::size_t len, std::string& error)
+getResult(const char* str, size_t len, std::string& error)
 {
     assert(str != nullptr);
     assert(len > 0);
@@ -75,7 +75,9 @@ AgentUploader::connect()
     _client.setMethod(HTTP_METHOD_POST);
     _client.setTimeout(CONFIG_WAKY_BACKEND_TIMEOUT);
 
+#ifdef DEBUG
     ESP_LOGD(TAG, "Create connection to backend server");
+#endif
     return _client.connect(HttpClient::kChunkConnection);
 }
 
@@ -87,14 +89,16 @@ AgentUploader::disconnect()
     }
 }
 
-std::size_t
-AgentUploader::upload(AudioDataAccessor audioData, long start, std::size_t count)
+size_t
+AgentUploader::upload(AudioDataAccessor audioData, long start, size_t count)
 {
-    static const std::size_t ChunkSize = CONFIG_WAKY_BACKEND_CHUNK_SIZE;
+    static const size_t ChunkSize = CONFIG_WAKY_BACKEND_CHUNK_SIZE;
 
     audioData.seek(start);
 
+#ifdef DEBUG
     ESP_LOGD(TAG, "Start writing chunk: start<%ld>, count<%u>", start, count);
+#endif
     _sender.startChunk(count * sizeof(int16_t));
 
     static int16_t chunk[ChunkSize];
@@ -108,18 +112,22 @@ AgentUploader::upload(AudioDataAccessor audioData, long start, std::size_t count
         count -= n;
     }
 
+#ifdef DEBUG
     ESP_LOGD(TAG, "End writing chunk: start<%ld>", start);
+#endif
     _sender.endChunk();
 
     return audioData.pos();
 }
 
 bool
-AgentUploader::finalize(std::int32_t timeout)
+AgentUploader::finalize(int32_t timeout)
 {
     static auto kWaitingDataTimeout = pdMS_TO_TICKS(300);
 
+#ifdef DEBUG
     ESP_LOGD(TAG, "Finalize sending of chunks");
+#endif
     _sender.finalize();
 
     assert(timeout > 0);
@@ -131,14 +139,20 @@ AgentUploader::finalize(std::int32_t timeout)
             continue;
         }
         if (len == -1 || len == -ESP_ERR_HTTP_EAGAIN) {
+#ifdef DEBUG
             ESP_LOGD(TAG, "Stream fetch headers error: %d", len);
+#endif
             break;
         }
 
+#ifdef DEBUG
         int statusCode = _client.getStatusCode();
         ESP_LOGD(TAG, "Stream status: len<%d>, code<%d>", len, statusCode);
+#endif
 
+#ifdef DEBUG
         ESP_LOGD(TAG, "Read result from backend");
+#endif
         std::vector<char> str(len, '\0');
         len = _client.read(str.data(), len);
         if (len > 0) {
@@ -149,7 +163,9 @@ AgentUploader::finalize(std::int32_t timeout)
             }
             return status;
         } else {
+#ifdef DEBUG
             ESP_LOGD(TAG, "Stream read error: %d", len);
+#endif
             return false;
         }
 

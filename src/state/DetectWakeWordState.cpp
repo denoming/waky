@@ -9,7 +9,6 @@
 #include "misc/Utils.hpp"
 #endif
 
-#include <esp_err.h>
 #include <esp_log.h>
 
 static const char* TAG = "ESP32 JRVA - DetectWakeWorkState";
@@ -22,6 +21,8 @@ DetectWakeWordState::DetectWakeWordState(StateContext& context, MemsMicrophone& 
 {
 }
 
+DetectWakeWordState::~DetectWakeWordState() = default;
+
 void
 DetectWakeWordState::enterState()
 {
@@ -31,15 +32,17 @@ DetectWakeWordState::enterState()
 void
 DetectWakeWordState::run()
 {
+#ifdef DEBUG
     ESP_LOGD(TAG, "run()");
+#endif
 
     auto audioData = _sampler.data();
     audioData.seek(audioData.pos() - CONFIG_WAKY_MEMPOOL_BUFFER_SIZE);
     float* inputBuffer = _network.getInputBuffer();
     _processor.getSpectrogram(audioData, inputBuffer);
     const float score = _network.predict();
-    if (score > 0.9) {
-        ESP_LOGD(TAG, "Detected: %.2f", score);
+    if (score >= 0.9) {
+        ESP_LOGI(TAG, "Detected: %.2f", score);
 #ifdef DEBUG
         printStackInfo(TAG, "After wake word detected");
 #endif

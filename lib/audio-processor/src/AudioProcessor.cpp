@@ -21,9 +21,9 @@ getMeanValue(AudioDataAccessor audioData, int audioLength)
 {
     float mean{0.0};
     for (int i = 0; i < audioLength; i++) {
-        mean += audioData.next();
+        mean += static_cast<float>(audioData.next());
     }
-    return (mean / audioLength);
+    return (mean / float(audioLength));
 }
 
 float
@@ -39,10 +39,8 @@ getMaxDeviationValue(AudioDataAccessor audioData, int audioLength, float mean)
 } // namespace
 
 AudioProcessor::AudioProcessor()
-    : AudioProcessor{CONFIG_JRVA_I2S_SAMPLE_RATE,
-                     CONFIG_JRVA_WWD_WINDOW_SIZE,
-                     CONFIG_JRVA_WWD_STEP_SIZE,
-                     CONFIG_JRVA_WWD_POOLING_SIZE}
+    : AudioProcessor{
+        16000, CONFIG_WAKY_WWD_WINDOW_SIZE, CONFIG_WAKY_WWD_STEP_SIZE, CONFIG_WAKY_WWD_POOLING_SIZE}
 {
 }
 
@@ -53,14 +51,14 @@ AudioProcessor::AudioProcessor(int audioLength, int windowSize, int stepSize, in
     , _poolingSize{poolingSize}
     , _fftSize{getInputSize(windowSize)}
     , _energySize{_fftSize / 2 + 1}
-    , _pooledEnergySize{static_cast<int>(ceilf(_energySize / static_cast<float>(poolingSize)))}
+    , _pooledEnergySize{static_cast<int>(ceilf(float(_energySize) / float(poolingSize)))}
     , _hammingWindow{windowSize}
 {
-    _fftInput.reset(new float[_fftSize]);
-    _fftOutput.reset(new kiss_fft_cpx[_energySize]);
-    _energy.reset(new float[_energySize]);
+    _fftInput = std::make_unique<float[]>(_fftSize);
+    _fftOutput = std::make_unique<kiss_fft_cpx[]>(_energySize);
+    _energy = std::make_unique<float[]>(_energySize);
 
-    _cfg = kiss_fftr_alloc(_fftSize, false, 0, 0);
+    _cfg = kiss_fftr_alloc(_fftSize, false, nullptr, nullptr);
 }
 
 AudioProcessor::~AudioProcessor()
@@ -74,11 +72,8 @@ AudioProcessor::getSpectrogram(AudioDataAccessor& audioData, float* outputSpectr
     const float mean = getMeanValue(audioData, _audioLength);
     const float maxDeviation = getMaxDeviationValue(audioData, _audioLength, mean);
 
-    assert(outputSpectrogram != nullptr);
-
-    const auto startIndex = audioData.pos();
-    for (std::size_t windowStart = startIndex;
-         windowStart < startIndex + _audioLength - _windowSize;
+    const int startIndex = audioData.pos();
+    for (int windowStart = startIndex; windowStart < startIndex + _audioLength - _windowSize;
          windowStart += _stepSize) {
         audioData.seek(windowStart);
         for (int i = 0; i < _windowSize; i++) {
@@ -116,7 +111,7 @@ AudioProcessor::getSpectrogramSegment(float* outputSpectrogramRow)
                 outputSrc++;
             }
         }
-        *outputDst = average / _poolingSize;
+        *outputDst = average / float(_poolingSize);
         outputDst++;
     }
 

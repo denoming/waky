@@ -6,6 +6,7 @@
 static const char* TAG = "ESP32 TFLITE WWD - MM";
 
 MemoryPool::MemoryPool()
+    : _chunks{}
 {
     for (int i = 0; i < ChunkCount; ++i) {
         _chunks[i] = nullptr;
@@ -27,7 +28,9 @@ MemoryPool::allocate()
             return false;
         }
 
+#ifdef DEBUG
         ESP_LOGD(TAG, "Allocate memory pool chunk: <%d>", i + 1);
+#endif
         assert(_chunks[i] == nullptr);
         _chunks[i] = new Chunk;
     }
@@ -39,28 +42,30 @@ void
 MemoryPool::deallocate()
 {
     for (int i = 0; i < ChunkCount; ++i) {
+#ifdef DEBUG
         ESP_LOGD(TAG, "Deallocate memory pool chunk: <%d>", i + 1);
+#endif
         delete _chunks[i];
         _chunks[i] = nullptr;
     }
 }
 
 void
-MemoryPool::set(std::size_t index, std::uint16_t value)
+MemoryPool::set(size_t index, int16_t value)
 {
     assert(index < capacity());
-    const long chunkIdx = (index / ChunkSize) % ChunkCount;
-    const long chunkPos = (index % ChunkSize);
+    const long chunkIdx = long(index / ChunkSize) % long(ChunkCount);
+    const long chunkPos = long(index % ChunkSize);
     assert(_chunks[chunkIdx] != nullptr);
     _chunks[chunkIdx]->set(chunkPos, value);
 }
 
-std::uint16_t
+int16_t
 MemoryPool::get(std::size_t index) const
 {
     assert(index < capacity());
-    const long chunkIdx = (index / ChunkSize) % ChunkCount;
-    const long chunkPos = (index % ChunkSize);
+    const long chunkIdx = long(index / ChunkSize) % long(ChunkCount);
+    const long chunkPos = long(index % ChunkSize);
     assert(_chunks[chunkIdx] != nullptr);
     return _chunks[chunkIdx]->get(chunkPos);
 }

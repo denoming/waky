@@ -7,18 +7,20 @@ class NeuralNetwork;
 class AudioProcessor;
 class MemsMicrophone;
 
-class DetectWakeWordState : public State {
+class DetectWakeWordState final : public State {
 public:
     DetectWakeWordState(StateContext& context, MemsMicrophone& sampler);
 
-    void
-    enterState() override;
+    ~DetectWakeWordState() final;
 
     void
-    run() override;
+    enterState() final;
 
     void
-    exitState() override;
+    run() final;
+
+    void
+    exitState() final;
 
 private:
     MemsMicrophone& _sampler;

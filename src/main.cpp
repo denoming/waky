@@ -3,12 +3,14 @@
 #ifdef DEBUG
 #include "misc/Utils.hpp"
 #endif
+#include "Application.hpp"
 
 #include <esp_log.h>
 
 static const char* TAG = "ESP32 WAKY - Main";
 
 static WiFi wifi;
+static Application app;
 
 void
 setup()
@@ -22,11 +24,18 @@ setup()
     } else {
         ESP_LOGE(TAG, "Unable to connect to <%s> WiFi AP", CONFIG_WAKY_WIFI_SSID);
     }
+
+    if (app.setup()) {
+        ESP_LOGI(TAG, "Setup application was successful");
+    } else {
+        ESP_LOGE(TAG, "Unable to setup application");
+    }
 }
 
 void
 run()
 {
+    app.start();
 }
 
 extern "C" void

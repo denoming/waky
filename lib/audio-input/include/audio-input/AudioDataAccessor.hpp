@@ -1,7 +1,6 @@
 #pragma once
 
-#include <memory>
-#include <vector>
+#include <esp_types.h>
 
 class MemoryPool;
 
@@ -10,27 +9,27 @@ public:
     explicit AudioDataAccessor(MemoryPool& memoryPool);
 
     void
-    set(std::int16_t sample);
+    set(int16_t sample);
 
-    std::int16_t
+    [[nodiscard]] int16_t
     get() const;
 
     void
-    put(std::int16_t sample);
+    put(int16_t sample);
 
-    std::int16_t
+    [[maybe_unused]] int16_t
     next();
 
-    std::size_t
+    [[nodiscard]] size_t
     pos() const;
 
     void
     seek(long offset);
 
-    AudioDataAccessor
+    [[nodiscard]] AudioDataAccessor
     clone();
 
 private:
     MemoryPool& _memoryPool;
-    std::size_t _index;
+    size_t _index;
 };

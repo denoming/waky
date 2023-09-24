@@ -7,18 +7,20 @@
 class MemsMicrophone;
 class AgentUploader;
 
-class RecordingCommandState : public State {
+class RecordingCommandState final : public State {
 public:
     RecordingCommandState(StateContext& context, MemsMicrophone& sampler);
 
-    void
-    enterState() override;
+    ~RecordingCommandState() final;
 
     void
-    run() override;
+    enterState() final;
 
     void
-    exitState() override;
+    run() final;
+
+    void
+    exitState() final;
 
 private:
     MemsMicrophone& _sampler;

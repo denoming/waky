@@ -8,8 +8,7 @@
 
 class Application {
 public:
-    static Application&
-    create();
+    Application();
 
     ~Application();
 
@@ -20,16 +19,5 @@ public:
     start();
 
 private:
-    Application();
-
-    void
-    main();
-
-    static void
-    run(void* param);
-
-private:
-    StateContext _context;
-    MemoryPool _memory;
-    MemsMicrophone _sampler;
+    class ApplicationImpl* _impl;
 };

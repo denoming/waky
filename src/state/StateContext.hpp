@@ -11,6 +11,8 @@ class AudioDataAccessor;
 
 class StateContext {
 public:
+    StateContext() = default;
+
     ~StateContext();
 
     template<typename S, typename... Args>

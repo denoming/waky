@@ -1,7 +1,5 @@
 #include "audio-input/MemsMicrophone.hpp"
 
-#include "audio-input/MemoryPool.hpp"
-
 #include <esp_log.h>
 #include <esp_assert.h>
 
