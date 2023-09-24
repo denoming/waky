@@ -43,7 +43,7 @@ menu "Waky configuration"
         config WAKY_MEMPOOL_BUFFER_COUNT
             int "Memory pool count of buffers"
             default 3
-            range 1 5
+            range 1 3
             help
                 The memory pool buffer count
     endmenu # Memory pool

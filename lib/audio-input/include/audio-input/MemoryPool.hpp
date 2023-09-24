@@ -4,6 +4,8 @@
 
 #include <esp_types.h>
 
+#include "sdkconfig.h"
+
 class MemoryPool final {
 public:
     MemoryPool();
@@ -26,8 +28,8 @@ public:
     capacity();
 
 private:
-    static const std::size_t ChunkCount = 5;
-    static const std::size_t ChunkSize = 1600;
+    static const std::size_t ChunkCount = CONFIG_WAKY_MEMPOOL_BUFFER_COUNT;
+    static const std::size_t ChunkSize = CONFIG_WAKY_MEMPOOL_BUFFER_SIZE;
 
     class Chunk {
     public:

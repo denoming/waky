@@ -27,7 +27,6 @@ MemoryPool::allocate()
             ESP_LOGE(TAG, "Free heap memory is exhausted");
             return false;
         }
-
 #ifdef DEBUG
         ESP_LOGD(TAG, "Allocate memory pool chunk: <%d>", i + 1);
 #endif

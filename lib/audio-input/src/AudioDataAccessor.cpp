@@ -49,13 +49,14 @@ void
 AudioDataAccessor::seek(long offset)
 {
     /* Normalization of negative offset */
-    _index = (offset + MemoryPool::capacity()) % MemoryPool::capacity();
+    const long totalSize = long(MemoryPool::capacity());
+    _index = (offset + totalSize) % totalSize;
 }
 
 AudioDataAccessor
 AudioDataAccessor::clone()
 {
     AudioDataAccessor copy{_memoryPool};
-    copy.seek(pos());
+    copy.seek(static_cast<long>(pos()));
     return copy;
 }
