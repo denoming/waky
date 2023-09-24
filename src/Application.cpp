@@ -75,10 +75,11 @@ ApplicationImpl::setup()
 void
 ApplicationImpl::start()
 {
-    static const auto kTaskStackDepth = 3072u;
-    static const auto kTaskPriority = (tskIDLE_PRIORITY + 1) | portPRIVILEGE_BIT;
+    static const int32_t kTaskStackDepth = 4096u;
+    static const int32_t kTaskPinnedCore = 0;
 
-    const auto rv = xTaskCreate(&run, "APP_TASK", kTaskStackDepth, this, kTaskPriority, nullptr);
+    const auto rv = xTaskCreatePinnedToCore(
+        &run, "WAKY_RECO", kTaskStackDepth, this, tskIDLE_PRIORITY, nullptr, kTaskPinnedCore);
     if (rv != pdPASS) {
         ESP_LOGE(TAG, "Failed to create application task");
         return;
@@ -92,7 +93,7 @@ ApplicationImpl::start()
 void
 ApplicationImpl::main()
 {
-    static const TickType_t kMaxBlockTime = pdMS_TO_TICKS(100);
+    static const TickType_t kMaxBlockTime = pdMS_TO_TICKS(300);
 
 #ifdef DEBUG
     printStackInfo(TAG, "Before listening");

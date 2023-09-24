@@ -73,7 +73,7 @@ MemsMicrophone::start(TaskHandle_t waiter)
 
     _waiter = waiter;
     if (xTaskCreatePinnedToCore(&MemsMicrophone::pullAudioDataTask,
-                                "PULL_DATA",
+                                "WAKY_PULL",
                                 kTaskStackDepth,
                                 this,
                                 tskIDLE_PRIORITY,
