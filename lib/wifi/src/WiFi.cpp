@@ -131,8 +131,9 @@ WiFiImpl::connect(uint32_t timeout)
         ESP_LOGE(TAG, "Unable to start WiFi in STA mode");
         return false;
     }
-
+#ifdef DEBUG
     ESP_LOGD(TAG, "Connecting to AP SSID: %s", WAKY_WIFI_SSID);
+#endif
 
     /**
      * Waiting until
@@ -142,7 +143,9 @@ WiFiImpl::connect(uint32_t timeout)
     const EventBits_t bits = xEventGroupWaitBits(
         _eventGroup, WIFI_CONNECTED_BIT | WIFI_FAIL_BIT, pdFALSE, pdFALSE, timeout);
     if (bits & WIFI_CONNECTED_BIT) {
+#ifdef DEBUG
         ESP_LOGD(TAG, "Connecting to AP SSID was successful: %s", WAKY_WIFI_SSID);
+#endif
         return true;
     }
     if (bits & WIFI_FAIL_BIT) {
@@ -188,7 +191,9 @@ WiFiImpl::onWiFiEvent(int32_t id, void* /*eventData*/)
         if (_retryCnt < WAKY_MAXIMUM_RETRY) {
             esp_wifi_connect();
             _retryCnt++;
+#ifdef DEBUG
             ESP_LOGD(TAG, "Retry to connect to the AP");
+#endif
         } else {
             xEventGroupSetBits(_eventGroup, WIFI_FAIL_BIT);
         }
@@ -203,7 +208,7 @@ WiFiImpl::onIpEvent(int32_t id, void* eventData)
 {
     if (id == IP_EVENT_STA_GOT_IP) {
         auto* event = static_cast<ip_event_got_ip_t*>(eventData);
-        ESP_LOGD(TAG, "Got IP:" IPSTR, IP2STR(&event->ip_info.ip));
+        ESP_LOGI(TAG, "Got IP:" IPSTR, IP2STR(&event->ip_info.ip));
         _retryCnt = 0;
         xEventGroupSetBits(_eventGroup, WIFI_CONNECTED_BIT);
     }
