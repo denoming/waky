@@ -2,9 +2,6 @@
 
 #include "audio-input/MemoryPool.hpp"
 
-#include <freertos/FreeRTOS.h>
-#include <freertos/task.h>
-
 #include <esp_log.h>
 #include <esp_assert.h>
 
@@ -14,43 +11,41 @@
 
 static const char* TAG = "ESP32 TFLITE WWD - MM";
 
-static const i2s_config_t I2S_CONFIG = {
-    .mode = (i2s_mode_t) (I2S_MODE_MASTER | I2S_MODE_RX),
-    .sample_rate = CONFIG_JRVA_I2S_SAMPLE_RATE,
-    .bits_per_sample = I2S_BITS_PER_SAMPLE_16BIT,
-    .channel_format = I2S_CHANNEL_FMT_ONLY_LEFT,
-    .communication_format = I2S_COMM_FORMAT_STAND_I2S,
-    .intr_alloc_flags = ESP_INTR_FLAG_LEVEL2,
-    .dma_buf_count = CONFIG_JRVA_I2S_DMA_BUFFER_COUNT,
-    .dma_buf_len = CONFIG_JRVA_I2S_DMA_BUFFER_SIZE,
-    .use_apll = false,
-    .tx_desc_auto_clear = false,
-    .fixed_mclk = 0,
-    .mclk_multiple = I2S_MCLK_MULTIPLE_512,
-    .bits_per_chan = I2S_BITS_PER_CHAN_DEFAULT,
-};
+// I2S interface pins configuration
+#define WAKY_I2S_MIC_SCK CONFIG_WAKY_I2S_MIC_SCK
+#define WAKY_I2S_MIC_WS CONFIG_WAKY_I2S_MIC_WS
+#define WAKY_I2S_MIC_SD CONFIG_WAKY_I2S_MIC_SD
+// I2S audio configuration
+#define WAKY_SAMPLE_RATE (16000) // The total amount of samples per second
+#define WAKY_SAMPLE_BITS (I2S_DATA_BIT_WIDTH_32BIT) // The lngth of each sample in bits
+#define WAKY_SAMPLE_MODE (I2S_SLOT_MODE_MONO) // Mono/Stereo
 
-static const i2s_pin_config_t I2S_PIN_CONFIG = {
-    .mck_io_num = I2S_PIN_NO_CHANGE,
-    .bck_io_num = CONFIG_JRVA_I2S_MIC_SCK,
-    .ws_io_num = CONFIG_JRVA_I2S_MIC_WS,
-    .data_out_num = I2S_PIN_NO_CHANGE,
-    .data_in_num = CONFIG_JRVA_I2S_MIC_SD,
+/* I2S interface configuration */
+const i2s_std_config_t I2S_CONFIG = {
+    .clk_cfg = I2S_STD_CLK_DEFAULT_CONFIG(WAKY_SAMPLE_RATE),
+    /***
+     * INMP1441:
+     *  - 64 SCK cycles in each WS stereo frame (or 32 SCK cycles per data-word)
+     *  - 24bit per channel
+     *  - MSB first with one SCK cycle delay
+     ***/
+    .slot_cfg = I2S_STD_PHILIPS_SLOT_DEFAULT_CONFIG(WAKY_SAMPLE_BITS, WAKY_SAMPLE_MODE),
+    .gpio_cfg = {
+        .mclk = I2S_GPIO_UNUSED,
+        .bclk = gpio_num_t(WAKY_I2S_MIC_SCK),
+        .ws = gpio_num_t(WAKY_I2S_MIC_WS),
+        .dout = I2S_GPIO_UNUSED,
+        .din = gpio_num_t(WAKY_I2S_MIC_SD),
+        .invert_flags = {
+            .mclk_inv = false,
+            .bclk_inv = false,
+            .ws_inv = false,
+        },
+    },
 };
 
 MemsMicrophone::MemsMicrophone(MemoryPool& memoryPool)
-    : MemsMicrophone{
-        I2S_PIN_CONFIG, static_cast<i2s_port_t>(CONFIG_JRVA_I2S_MIC_PORT), I2S_CONFIG, memoryPool}
-{
-}
-
-MemsMicrophone::MemsMicrophone(i2s_pin_config_t pins,
-                               i2s_port_t port,
-                               i2s_config_t config,
-                               MemoryPool& memoryPool)
-    : _pins{pins}
-    , _port{port}
-    , _config{config}
+    : _channelHandle{}
     , _accessor{memoryPool}
     , _waiter{nullptr}
 {
@@ -59,36 +54,36 @@ MemsMicrophone::MemsMicrophone(i2s_pin_config_t pins,
 bool
 MemsMicrophone::start(TaskHandle_t waiter)
 {
-    static const int kQueueSize = 8;
-    static const uint32_t kTaskStackDepth = 2048u;
-    static const UBaseType_t kTaskPriority
-        = UBaseType_t((tskIDLE_PRIORITY + 1) | portPRIVILEGE_BIT);
+    static const int32_t kTaskStackDepth = 4096u;
+    static const int32_t kTaskPinnedCore = 1;
 
-    if (i2s_driver_install(_port, &_config, kQueueSize, &_queue) != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to install I2S driver");
+    i2s_chan_config_t cfg = I2S_CHANNEL_DEFAULT_CONFIG(I2S_NUM_AUTO, I2S_ROLE_MASTER);
+    if (i2s_new_channel(&cfg, nullptr, &_channelHandle) != ESP_OK) {
+        ESP_LOGE(TAG, "Unable to crease audio channel");
         return false;
     }
 
-    if (i2s_set_pin(_port, &_pins) != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to set I2S pin");
+    if (i2s_channel_init_std_mode(_channelHandle, &I2S_CONFIG) != ESP_OK) {
+        ESP_LOGE(TAG, "Unable to initialize audio channel");
         return false;
     }
 
-    if (i2s_set_clk(_port, CONFIG_JRVA_I2S_SAMPLE_RATE, I2S_BITS_PER_SAMPLE_16BIT, I2S_CHANNEL_MONO) != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to set I2S clock config");
+    if (i2s_channel_enable(_channelHandle) != ESP_OK) {
+        ESP_LOGE(TAG, "Unable to enable audio channel");
         return false;
     }
 
     _waiter = waiter;
-    const auto rv = xTaskCreate(&MemsMicrophone::pullDataTask,
-                                "MEMS microphone pull data task",
+    if (xTaskCreatePinnedToCore(&MemsMicrophone::pullAudioDataTask,
+                                "PULL_DATA",
                                 kTaskStackDepth,
                                 this,
-                                kTaskPriority,
-                                nullptr);
-    if (rv != pdPASS) {
+                                tskIDLE_PRIORITY,
+                                nullptr,
+                                kTaskPinnedCore)
+        != pdPASS) {
         _waiter = nullptr;
-        ESP_LOGE(TAG, "Failed to create pull data task");
+        ESP_LOGE(TAG, "Unable to create pull data task");
         return false;
     }
 
@@ -102,51 +97,47 @@ MemsMicrophone::data()
 }
 
 std::size_t
-MemsMicrophone::pullData(uint8_t* buffer, std::size_t size)
+MemsMicrophone::pullAudioData(uint8_t* buffer, size_t size)
 {
-    static const TickType_t kTimeout = 100 / portTICK_PERIOD_MS;
-
-    std::size_t bytesRead{0};
-    i2s_event_t event;
-    if (xQueueReceive(_queue, &event, portMAX_DELAY) == pdPASS) {
-        if (event.type == I2S_EVENT_RX_DONE) {
-            ESP_ERROR_CHECK(i2s_read(_port, buffer, size, &bytesRead, kTimeout));
-        }
-    }
+    size_t bytesRead{0};
+    ESP_ERROR_CHECK(i2s_channel_read(_channelHandle, buffer, size, &bytesRead, portMAX_DELAY));
     return bytesRead;
 }
 
 void
-MemsMicrophone::processData(const uint8_t* buffer, std::size_t size)
+MemsMicrophone::processAudioData(const uint8_t* buffer, std::size_t size)
 {
-    const auto* samples = reinterpret_cast<const int16_t*>(buffer);
+    static const int kDataBitShift = 11;
+
+    const auto* samples = reinterpret_cast<const int32_t*>(buffer);
     assert(samples != nullptr);
-    for (int i = 0; i < size / sizeof(int16_t); ++i) {
-        _accessor.put(samples[i]);
+    for (int i = 0; i < size / sizeof(int32_t); ++i) {
+        _accessor.put(static_cast<int16_t>(samples[i] >> kDataBitShift));
     }
 }
 
-void
-MemsMicrophone::pullDataTask(void* param)
+[[noreturn]] void
+MemsMicrophone::pullAudioDataTask(void* param)
 {
-    static const std::size_t kNotifyThreshold = 1600;
-    static const std::size_t kBufferSize = CONFIG_JRVA_I2S_DMA_BUFFER_COUNT
-                                           * CONFIG_JRVA_I2S_DMA_BUFFER_SIZE
-                                           * CONFIG_JRVA_I2S_SAMPLE_BYTES;
+    static const size_t kNotifyThreshold = 1600;
+    static const size_t kBufferSize = 1024;
 
     assert(param != nullptr);
-    MemsMicrophone* mic = static_cast<MemsMicrophone*>(param);
+    auto* mic = static_cast<MemsMicrophone*>(param);
 
-    static uint8_t buffer[kBufferSize];
 #ifdef DEBUG
     printStackInfo(TAG, "Before pulling of data");
 #endif
-    std::size_t totalBytes{0};
+
+    /**
+     * Pulling audio data loop (PULL_DATA task: CPU1)
+     */
+    size_t totalBytes{0};
+    uint8_t buffer[kBufferSize];
     while (true) {
-        std::size_t bytesRead{0};
-        bytesRead = mic->pullData(buffer, kBufferSize);
+        size_t bytesRead = mic->pullAudioData(buffer, kBufferSize);
         if (bytesRead > 0) {
-            mic->processData(buffer, bytesRead);
+            mic->processAudioData(buffer, bytesRead);
             totalBytes += bytesRead;
             if (totalBytes >= kNotifyThreshold) {
                 totalBytes -= kNotifyThreshold;
@@ -159,5 +150,6 @@ MemsMicrophone::pullDataTask(void* param)
 void
 MemsMicrophone::notify()
 {
+    /* Send a direct to task notification  */
     xTaskNotify(_waiter, 1, eSetBits);
 }

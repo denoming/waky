@@ -1,150 +1,113 @@
-menu "J.A.R.V.I.S Agent Configuration"
-
+menu "Waky configuration"
     menu "Backend"
-        config JRVA_BACKEND_ADDR
-            string "Backend URL address"
-            default "api.jarvis.com"
+        config WAKY_BACKEND_HOST
+            string "Server hostname"
+            default "api.backend.com"
             help
-                J.A.R.V.I.S backend URL address
+                The hostname (IP address) of server to send recorded audio
 
-        config JRVA_BACKEND_PORT
-            int "Backend port"
+        config WAKY_BACKEND_PORT
+            int "Server TCP/IP port"
             default 8000
             help
-                J.A.R.V.I.S backend port number
+                The port number of HTTP server to send recorded audio
 
-        config JRVA_BACKEND_PATH
-            string "Backend API path"
+        config WAKY_BACKEND_PATH
+            string "Target path"
             default "/speech"
             help
-                J.A.R.V.I.S backend API path
+                The target path to send recorded audio
 
-        config JRVA_BACKEND_TIMEOUT
-            int "Backend request timeout"
+        config WAKY_BACKEND_TIMEOUT
+            int "Request timeout"
             default 5000
             range 1000 8000
             help
-                J.A.R.V.I.S backend request timeout
+                The send recorded audio timeout
 
-         config JRVA_BACKEND_CHUNK_SIZE
-            int "Backend chunk size"
+         config WAKY_BACKEND_CHUNK_SIZE
+            int "Chunk size"
             default 1000
             range 500 3000
             help
-                J.A.R.V.I.S backend chunk size
-    endmenu
-
+                The send recorded audio chunk size
+    endmenu # Backend
 
     menu "Memory pool"
-        config JRVA_MEMPOOL_BUFFER_SIZE
+        config WAKY_MEMPOOL_BUFFER_SIZE
             int "Memory pool buffer size"
             default 16000
             help
                 The memory pool buffer size in bytes (correspond to sample rate)
 
-        config JRVA_MEMPOOL_BUFFER_COUNT
+        config WAKY_MEMPOOL_BUFFER_COUNT
             int "Memory pool count of buffers"
             default 3
             range 1 5
             help
                 The memory pool buffer count
-    endmenu
+    endmenu # Memory pool
 
     menu "Wake word detection"
-        config JRVA_WWD_WINDOW_SIZE
+        config WAKY_WWD_WINDOW_SIZE
             int "WWD window size"
             default 320
             help
                 The size of window to calculate the spectrogram
         
-        config JRVA_WWD_STEP_SIZE
+        config WAKY_WWD_STEP_SIZE
             int "WWD step size"
             default 160
             help
                 The size of step to move spectrogram calculation window
 
-        config JRVA_WWD_POOLING_SIZE
+        config WAKY_WWD_POOLING_SIZE
             int "WWD pooling size"
             default 6
             help
                 The pooling size of spectrogram calculation
-    endmenu
+    endmenu # Wake word detection
 
     menu "Periphery"
-        config JRVA_I2S_MIC_PORT
-            int "I2S port"
-            default 0
-            range 0 1
-            help
-                The port number of I2S microphone (usually has 0 or 1 value)
-
-        config JRVA_I2S_MIC_SCK
+        config WAKY_I2S_MIC_SCK
             int "I2S SCK pin number"
             default 26
             range 0 39
             help
                 The pin number of I2S microphone signal clock line
 
-        config JRVA_I2S_MIC_WS
+        config WAKY_I2S_MIC_WS
             int "I2S WS pin number"
             default 22
             range 0 39
             help
                 The pin number of I2S microphone word select line
 
-        config JRVA_I2S_MIC_SD
+        config WAKY_I2S_MIC_SD
             int "I2S SD pin number"
             default 21
             range 0 39
             help
                 The pin number of I2S microphone serial data line
-
-        config JRVA_I2S_DMA_BUFFER_COUNT
-            int "I2S DMA buffer count"
-            default 4
-            range 1 8
-            help
-                The count of DMA buffers used for I2S microphone
-
-        config JRVA_I2S_DMA_BUFFER_SIZE
-            int "I2S DMA buffer size"
-            default 64
-            range 32 256
-            help
-                The size of each DMA buffer
-
-        config JRVA_I2S_SAMPLE_BYTES
-            int "I2S sample bytes"
-            default 4
-            range 1 4
-            help
-                The number of bytes on each audio sample (relates to bits per sample)
-
-        config JRVA_I2S_SAMPLE_RATE
-            int "I2S sample rate"
-            default 16000
-            help
-                The number of samples per secong of audio stream
-    endmenu
+    endmenu # Periphery
 
     menu "WiFi"
-        config JRVA_WIFI_SSID
+        config WAKY_WIFI_SSID
             string "WiFi SSID"
-            default "ZION"
+            default "myssid"
             help
                 SSID (network name) for the example to connect to.
 
-        config JRVA_WIFI_PASSWORD
+        config WAKY_WIFI_PASSWORD
             string "WiFi Password"
             default "mypassword"
             help
                 WiFi password (WPA or WPA2) for the example to use.
 
-        config JRVA_WIFI_MAXIMUM_RETRY
+        config WAKY_WIFI_MAXIMUM_RETRY
             int "Maximum retry to connect"
             default 5
             help
                 Set the Maximum retry to avoid station reconnecting to the AP unlimited when the AP is really inexistent.
-    endmenu
-    
+    endmenu # WiFi
 endmenu

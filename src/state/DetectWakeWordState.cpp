@@ -34,7 +34,7 @@ DetectWakeWordState::run()
     ESP_LOGD(TAG, "run()");
 
     auto audioData = _sampler.data();
-    audioData.seek(audioData.pos() - CONFIG_JRVA_I2S_SAMPLE_RATE);
+    audioData.seek(audioData.pos() - CONFIG_WAKY_MEMPOOL_BUFFER_SIZE);
     float* inputBuffer = _network.getInputBuffer();
     _processor.getSpectrogram(audioData, inputBuffer);
     const float score = _network.predict();

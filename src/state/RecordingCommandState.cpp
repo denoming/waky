@@ -52,7 +52,7 @@ RecordingCommandState::run()
     auto audioData = _sampler.data();
     if (_lastAudioPosition == DEFAULT_POSITION) {
         ESP_LOGD(TAG, "Initialize the last audio position");
-        _lastAudioPosition = audioData.pos() - CONFIG_JRVA_I2S_SAMPLE_RATE;
+        _lastAudioPosition = audioData.pos() - CONFIG_WAKY_MEMPOOL_BUFFER_SIZE;
     }
 
     static const auto capacity = MemoryPool::capacity();

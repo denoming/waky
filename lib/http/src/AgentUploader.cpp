@@ -52,7 +52,7 @@ getResult(const char* str, std::size_t len, std::string& error)
 } // namespace
 
 AgentUploader::AgentUploader()
-    : _client{*this, CONFIG_JRVA_BACKEND_ADDR, CONFIG_JRVA_BACKEND_PORT, CONFIG_JRVA_BACKEND_PATH}
+    : _client{*this, CONFIG_WAKY_BACKEND_HOST, CONFIG_WAKY_BACKEND_PORT, CONFIG_WAKY_BACKEND_PATH}
     , _sender{_client}
 {
 }
@@ -73,7 +73,7 @@ AgentUploader::connect()
     _client.setHeader(Http::Field::Expect, "100-continue");
     _client.setHeader(Http::Field::UserAgent, "J.A.R.V.I.S Agent");
     _client.setMethod(HTTP_METHOD_POST);
-    _client.setTimeout(CONFIG_JRVA_BACKEND_TIMEOUT);
+    _client.setTimeout(CONFIG_WAKY_BACKEND_TIMEOUT);
 
     ESP_LOGD(TAG, "Create connection to backend server");
     return _client.connect(HttpClient::kChunkConnection);
@@ -90,7 +90,7 @@ AgentUploader::disconnect()
 std::size_t
 AgentUploader::upload(AudioDataAccessor audioData, long start, std::size_t count)
 {
-    static const std::size_t ChunkSize = CONFIG_JRVA_BACKEND_CHUNK_SIZE;
+    static const std::size_t ChunkSize = CONFIG_WAKY_BACKEND_CHUNK_SIZE;
 
     audioData.seek(start);
 

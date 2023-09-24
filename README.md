@@ -1,44 +1,58 @@
-# J.A.R.V.I.S
+# Waky
 
-# Introduction
+## Introduction
 
-J.A.R.V.I.S Agent is an applciation reponsible to detect pre-configured word ("Marvin"), record a speech and send to backend for further processing.
+Waky is an application responsible for detecting pre-configured word ("Marvin"),
+record a speech and send recorded audio to a backend for further processing.
 
-# Dependencies
+## Dependencies
 
-* ESP-IDF (ver. 4.4.3)
-* TensorFlow Lite Micro ([repository](https://github.com/espressif/tflite-micro-esp-examples.git))
-* KissFFT ([repository](https://github.com/karz0n/esp32-kissfft.git))
+* Platform.io toolkit
+* ESP-IDF (ver. 5.1)
+* TensorFlow Lite Micro (git submodule)
+* ESP-NN (git submodule)
+* KissFFT (git submodule)
 
-Note: The TensorFlow Lite component is responsible for recognizing wake word using trained model and gistogram of recorded sound.
+Note: The TensorFlow Lite component is responsible for recognizing wake word using trained model and histogram of recorded sound.
 
-Note: The KissFFT component is responsible for making gistogram of recorded sound.
+Note: The KissFFT component is responsible for making histogram of recorded sound.
 
-# Prepare
+## Pins
 
-* Install [Visual Studio Code](https://code.visualstudio.com/) IDE
-* Install [PlatformIO IDE](https://platformio.org/platformio-ide)
-* Open IDE and pre-install ESP-IDF with particular version
+The pin-out for INMP441 sensor is next:
 
-# Configure
+| INMP441 | ESP32  | Info                          |
+|---------|--------|-------------------------------|
+| L/R     | GND    | Left channel or right channel |
+| WS      | GPIO22 | Left right clock              |
+| SCK     | GPIO26 | Serial clock                  |
+| SD      | GPIO21 | Serial data                   |
+| VDD     | 3v3    | Power - DO NOT USE 5V!        |
+| GND     | GND    | GND                           |
 
-* Open project in IDE
-* On the left panel click on PlatformIDE icon
-* Click on "PlatformIO Core CLI"
-* Run command:
+## Build
+
+* Clone
+```shell
+$ git clone <url>
+$ cd waky
+$ git submodule update --init --recursive
+```
+
+* Build
 ```shell
 $ pio run -t menuconfig
+$ pio run
 ```
-* Apply configuration (see J.A.R.V.I.S Agent Configuration)
 
-Note: Usually you might need to change "Backend" configuration (URL address and port). Any other configration is not needed.
+Note: Visit "Waky configuration" submenu
 
-# Build
-
-* Clone dependencies using helpfull script:
+* Upload
 ```shell
-$ cd <project-path>
-$ bash scripts/setup.sh
+$ pio run -t upload
 ```
-* Open project in IDE
-* Build
+
+* Connect
+```shell
+$ pio run -t monitor
+```

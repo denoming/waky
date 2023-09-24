@@ -27,8 +27,8 @@ public:
     capacity();
 
 private:
-    static const std::size_t ChunkCount = CONFIG_JRVA_MEMPOOL_BUFFER_COUNT;
-    static const std::size_t ChunkSize = CONFIG_JRVA_MEMPOOL_BUFFER_SIZE;
+    static const std::size_t ChunkCount = CONFIG_WAKY_MEMPOOL_BUFFER_COUNT;
+    static const std::size_t ChunkSize = CONFIG_WAKY_MEMPOOL_BUFFER_SIZE;
 
     class Chunk {
     public:
