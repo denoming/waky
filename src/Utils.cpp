@@ -1,4 +1,4 @@
-#include "misc/Utils.hpp"
+#include "Utils.hpp"
 
 #include <freertos/FreeRTOS.h>
 #include <freertos/task.h>
