@@ -1,24 +1,24 @@
 #pragma once
 
-#include <memory>
+#include <esp_types.h>
 
 class WiFi {
 public:
     static constexpr uint32_t kMaxDelay = 0xFFFFFFFFUL;
 
-    static WiFi&
-    create();
+    WiFi();
+
+    ~WiFi();
 
     bool
-    setUp(uint32_t timeout = kMaxDelay);
+    setup();
+
+    bool
+    connect(uint32_t timeout = kMaxDelay);
 
     void
-    tearDown();
+    finalise();
 
 private:
-    class Impl;
-    WiFi(std::unique_ptr<Impl> impl);
-
-private:
-    std::unique_ptr<Impl> _impl;
+    class WiFiImpl* _impl;
 };

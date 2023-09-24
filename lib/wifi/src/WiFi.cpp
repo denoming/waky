@@ -12,44 +12,25 @@
 
 #include <nvs_flash.h>
 
-#include <string.h>
+#include "wifi/Config.hpp"
 
-static const char* TAG = "ESP32 JRVA - WiFi";
+static const char* TAG = "ESP32 WAKY - WiFi";
 
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT BIT1
 
-#define WIFI_SSID CONFIG_WAKY_WIFI_SSID
-#define WIFI_PASS CONFIG_WAKY_WIFI_PASSWORD
-#define WIFI_MAXIMUM_RETRY CONFIG_WAKY_WIFI_MAXIMUM_RETRY
-
-namespace {
-
-void
-initializeFlash()
-{
-    auto error = nvs_flash_init();
-    if (error == ESP_ERR_NVS_NO_FREE_PAGES || error == ESP_ERR_NVS_NEW_VERSION_FOUND) {
-        ESP_ERROR_CHECK(nvs_flash_erase());
-        error = nvs_flash_init();
-    }
-    ESP_ERROR_CHECK(error);
-}
-
-} // namespace
-
-class WiFi::Impl {
+class WiFiImpl {
 public:
-    Impl();
-
-    void
-    initialize();
+    WiFiImpl() = default;
 
     bool
-    setUp(uint32_t timeout);
+    setup();
+
+    bool
+    connect(uint32_t timeout);
 
     void
-    tearDown();
+    finalise();
 
 private:
     void
@@ -62,180 +43,215 @@ private:
     eventHandler(void* arg, esp_event_base_t eventBase, int32_t eventId, void* eventData);
 
 private:
-    esp_netif_t* _netInter;
-    EventGroupHandle_t _wifiEventGroup;
-    esp_event_handler_instance_t _wifiEvent;
-    esp_event_handler_instance_t _ipEvent;
-    int _retryNumber;
+    EventGroupHandle_t _eventGroup{};
+    esp_event_handler_instance_t _wifiEventHandler{};
+    esp_event_handler_instance_t _ipEventHandler{};
+    esp_netif_t* _netInter{};
+    std::size_t _retryCnt{};
 };
 
-WiFi::Impl::Impl()
-    : _netInter{nullptr}
-    , _wifiEventGroup{nullptr}
-    , _wifiEvent{nullptr}
-    , _ipEvent{nullptr}
-    , _retryNumber{0}
-{
-}
-
-void
-WiFi::Impl::initialize()
-{
-    ESP_LOGD(TAG, "Initialize NVS flash");
-    initializeFlash();
-
-    ESP_LOGD(TAG, "Initialize TCP/IP stack");
-    ESP_ERROR_CHECK(esp_netif_init());
-}
-
 bool
-WiFi::Impl::setUp(uint32_t timeout)
+WiFiImpl::setup()
 {
-    ESP_ERROR_CHECK(esp_event_loop_create_default());
+    _eventGroup = xEventGroupCreate();
+    ESP_RETURN_ON_FALSE(_eventGroup != nullptr, false, TAG, "Unable to create event group");
 
-    _wifiEventGroup = xEventGroupCreate();
-    ESP_RETURN_ON_FALSE(_wifiEventGroup != NULL, false, TAG, "Failed to create event group");
+    esp_err_t rv = nvs_flash_init();
+    if (rv == ESP_ERR_NVS_NO_FREE_PAGES || rv == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+        ESP_ERROR_CHECK(nvs_flash_erase());
+        rv = nvs_flash_init();
+    }
+    if (rv != ESP_OK) {
+        ESP_LOGE(TAG, "Unable to initialise NVS flash memory");
+        return false;
+    }
 
-    ESP_ERROR_CHECK(esp_event_handler_instance_register(
-        WIFI_EVENT, ESP_EVENT_ANY_ID, &Impl::eventHandler, this, &_wifiEvent));
-    ESP_ERROR_CHECK(esp_event_handler_instance_register(
-        IP_EVENT, IP_EVENT_STA_GOT_IP, &Impl::eventHandler, this, &_ipEvent));
+    if (esp_netif_init() != ESP_OK) {
+        ESP_LOGE(TAG, "Unable to initialise network interface");
+        return false;
+    }
 
-    ESP_LOGD(TAG, "Create default WiFi STA");
+    if (esp_event_loop_create_default() != ESP_OK) {
+        ESP_LOGE(TAG, "Unable to create event loop");
+        return false;
+    }
+
     _netInter = esp_netif_create_default_wifi_sta();
+    assert(_netInter != nullptr);
 
-    ESP_LOGD(TAG, "Initialize WiFi");
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-    ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+    if (esp_wifi_init(&cfg) != ESP_OK) {
+        ESP_LOGE(TAG, "Unable to initialise WiFi");
+        esp_netif_destroy_default_wifi(_netInter);
+        return false;
+    }
 
-    wifi_config_t wifiConfig = {};
-    strcpy(reinterpret_cast<char*>(wifiConfig.sta.ssid), WIFI_SSID);
-    strcpy(reinterpret_cast<char*>(wifiConfig.sta.password), WIFI_PASS);
-    wifiConfig.sta.threshold = {
-        .rssi = 0,
-        .authmode = WIFI_AUTH_WPA2_PSK,
+    if (esp_event_handler_instance_register(
+            WIFI_EVENT, ESP_EVENT_ANY_ID, &eventHandler, this, &_wifiEventHandler)
+        != ESP_OK) {
+        ESP_LOGE(TAG, "Unable to register event handler (WiFi)");
+        return false;
+    }
+    if (esp_event_handler_instance_register(
+            IP_EVENT, IP_EVENT_STA_GOT_IP, &eventHandler, this, &_ipEventHandler)
+        != ESP_OK) {
+        ESP_LOGE(TAG, "Unable to register event handler (IP)");
+        return false;
+    }
+
+    wifi_config_t wifiConfig = {
+        .sta = {
+            .ssid = WAKY_WIFI_SSID,
+            .password = WAKY_WIFI_PASSWORD,
+            .threshold = {
+                .authmode = WAKY_WIFI_SCAN_AUTH_MODE_THRESHOLD
+            },
+            .sae_pwe_h2e = WAKY_WIFI_SAE_MODE,
+            .sae_h2e_identifier = WAKY_WIFI_H2E_IDENTIFIER,
+        },
     };
 
-    ESP_LOGD(TAG, "Starting WiFi");
-    ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
-    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
-    ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifiConfig));
-    ESP_ERROR_CHECK(esp_wifi_set_protocol(WIFI_IF_STA, WIFI_PROTOCOL_11B | WIFI_PROTOCOL_11G));
-    ESP_ERROR_CHECK(esp_wifi_start());
+    if (esp_wifi_set_mode(WIFI_MODE_STA) != ESP_OK) {
+        ESP_LOGE(TAG, "Unable to set WiFi mode");
+        return false;
+    }
 
-    ESP_LOGD(TAG, "Waiting for connection to <%s> AP", WIFI_SSID);
-    EventBits_t bits{WIFI_CONNECTED_BIT | WIFI_FAIL_BIT};
-    bits = xEventGroupWaitBits(_wifiEventGroup, bits, pdFALSE, pdFALSE, timeout);
-    if (bits & WIFI_CONNECTED_BIT) {
-        ESP_LOGI(TAG, "Connected to <%s> AP", WIFI_SSID);
-    } else if (bits & WIFI_FAIL_BIT) {
-        ESP_LOGI(TAG, "Failed connecting to <%s> AP", WIFI_SSID);
-    } else {
-        ESP_LOGE(TAG, "Unexpected event");
+    if (esp_wifi_set_config(WIFI_IF_STA, &wifiConfig) != ESP_OK) {
+        ESP_LOGE(TAG, "Unable to set WiFi config");
+        return false;
     }
 
     return true;
 }
 
-void
-WiFi::Impl::tearDown()
+bool
+WiFiImpl::connect(uint32_t timeout)
 {
-    _retryNumber = 0;
+    if (esp_wifi_start() != ESP_OK) {
+        ESP_LOGE(TAG, "Unable to start WiFi in STA mode");
+        return false;
+    }
 
-    esp_event_handler_instance_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, _wifiEvent);
-    _wifiEvent = nullptr;
-    esp_event_handler_instance_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, _ipEvent);
-    _ipEvent = nullptr;
+    ESP_LOGD(TAG, "Connecting to AP SSID: %s", WAKY_WIFI_SSID);
 
-    ESP_ERROR_CHECK(esp_wifi_disconnect());
-    ESP_ERROR_CHECK(esp_wifi_stop());
-    ESP_ERROR_CHECK(esp_wifi_deinit());
+    /**
+     * Waiting until
+     * - the connection is established (WIFI_CONNECTED_BIT)
+     * - connection failed for the maximum number of re-tries (WIFI_FAIL_BIT)
+     */
+    const EventBits_t bits = xEventGroupWaitBits(
+        _eventGroup, WIFI_CONNECTED_BIT | WIFI_FAIL_BIT, pdFALSE, pdFALSE, timeout);
+    if (bits & WIFI_CONNECTED_BIT) {
+        ESP_LOGD(TAG, "Connecting to AP SSID was successful: %s", WAKY_WIFI_SSID);
+        return true;
+    }
+    if (bits & WIFI_FAIL_BIT) {
+        ESP_LOGE(TAG, "Unable to connect to SSID: %s", WAKY_WIFI_SSID);
+        return true;
+    }
 
-    esp_netif_destroy_default_wifi(_netInter);
-    _netInter = nullptr;
-
-    ESP_ERROR_CHECK(esp_event_loop_delete_default());
-
-    vEventGroupDelete(_wifiEventGroup);
-    _wifiEventGroup = nullptr;
+    ESP_LOGE(TAG, "Unexpected event");
+    return false;
 }
 
 void
-WiFi::Impl::onWiFiEvent(int32_t id, void* data)
+WiFiImpl::finalise()
+{
+    _retryCnt = 0;
+
+    esp_event_handler_instance_unregister(WIFI_EVENT, ESP_EVENT_ANY_ID, _wifiEventHandler);
+    _wifiEventHandler = {};
+    esp_event_handler_instance_unregister(IP_EVENT, IP_EVENT_STA_GOT_IP, _ipEventHandler);
+    _ipEventHandler = {};
+
+    esp_wifi_disconnect();
+    esp_wifi_stop();
+    esp_wifi_deinit();
+
+    esp_netif_destroy_default_wifi(_netInter);
+    _netInter = {};
+
+    esp_event_loop_delete_default();
+
+    vEventGroupDelete(_eventGroup);
+    _eventGroup = {};
+}
+
+void
+WiFiImpl::onWiFiEvent(int32_t id, void* /*eventData*/)
 {
     switch (id) {
     case WIFI_EVENT_STA_START:
-        ESP_LOGD(TAG, "Connectin to <%s> AP", WIFI_SSID);
         esp_wifi_connect();
         break;
     case WIFI_EVENT_STA_DISCONNECTED:
-        if (_retryNumber < WIFI_MAXIMUM_RETRY) {
+        if (_retryCnt < WAKY_MAXIMUM_RETRY) {
             esp_wifi_connect();
-            _retryNumber++;
-            ESP_LOGD(TAG, "Retry connecting to <%s> AP", WIFI_SSID);
+            _retryCnt++;
+            ESP_LOGD(TAG, "Retry to connect to the AP");
         } else {
-            xEventGroupSetBits(_wifiEventGroup, WIFI_FAIL_BIT);
+            xEventGroupSetBits(_eventGroup, WIFI_FAIL_BIT);
         }
+        break;
+    default:
         break;
     }
 }
 
 void
-WiFi::Impl::onIpEvent(int32_t id, void* data)
+WiFiImpl::onIpEvent(int32_t id, void* eventData)
 {
     if (id == IP_EVENT_STA_GOT_IP) {
-        auto* event = reinterpret_cast<ip_event_got_ip_t*>(data);
-        ESP_LOGD(TAG, "Got ip:" IPSTR, IP2STR(&event->ip_info.ip));
-        _retryNumber = 0;
-        xEventGroupSetBits(_wifiEventGroup, WIFI_CONNECTED_BIT);
+        auto* event = static_cast<ip_event_got_ip_t*>(eventData);
+        ESP_LOGD(TAG, "Got IP:" IPSTR, IP2STR(&event->ip_info.ip));
+        _retryCnt = 0;
+        xEventGroupSetBits(_eventGroup, WIFI_CONNECTED_BIT);
     }
 }
 
 void
-WiFi::Impl::eventHandler(void* arg, esp_event_base_t eventBase, int32_t eventId, void* eventData)
+WiFiImpl::eventHandler(void* arg, esp_event_base_t eventBase, int32_t eventId, void* eventData)
 {
-    Impl* self = static_cast<Impl*>(arg);
+    auto* const self = static_cast<WiFiImpl*>(arg);
     assert(self != nullptr);
 
     if (eventBase == WIFI_EVENT) {
         self->onWiFiEvent(eventId, eventData);
-        return;
-    }
-    if (eventBase == IP_EVENT) {
+    } else if (eventBase == IP_EVENT) {
         self->onIpEvent(eventId, eventData);
-        return;
     }
 
-    ESP_LOGE(TAG, "Unexpected event");
+    /* Not interesting events */
 }
 
-WiFi&
-WiFi::create()
+WiFi::WiFi()
 {
-    static std::unique_ptr<WiFi> instance;
-    if (!instance) {
-        std::unique_ptr<WiFi::Impl> impl{new WiFi::Impl};
-        impl->initialize();
-        instance.reset(new WiFi{std::move(impl)});
-    }
-    return *instance;
+    static WiFiImpl impl;
+    _impl = &impl;
 }
 
-WiFi::WiFi(std::unique_ptr<Impl> impl)
-    : _impl{std::move(impl)}
+WiFi::~WiFi()
 {
+    _impl = nullptr;
 }
 
 bool
-WiFi::setUp(TickType_t timeout)
+WiFi::setup()
 {
-    assert(_impl);
-    return _impl->setUp(timeout);
+    assert(_impl != nullptr);
+    return _impl->setup();
+}
+
+bool
+WiFi::connect(uint32_t timeout)
+{
+    assert(_impl != nullptr);
+    return _impl->connect(timeout);
 }
 
 void
-WiFi::tearDown()
+WiFi::finalise()
 {
-    assert(_impl);
-    _impl->tearDown();
+    assert(_impl != nullptr);
+    return _impl->finalise();
 }

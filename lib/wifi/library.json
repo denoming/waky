@@ -1,0 +1,8 @@
+{
+  "name": "WiFi Library",
+  "version": "1.0.0",
+  "description": "WiFi modules responsible for connection to WiFi AP",
+  "build": {
+    "flags": "-Wno-missing-field-initializers"
+  }
+}
