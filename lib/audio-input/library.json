@@ -1,0 +1,5 @@
+{
+  "name": "AudioInput",
+  "version": "1.0.0",
+  "description": "Responsible for reading audio samples from microphone"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "NeuralNetwork",
+  "version": "1.0.0",
+  "description": "Contains model and describes neural network",
+  "build": {
+    "flags": "-Wno-deprecated-declarations"
+  }
+}
+

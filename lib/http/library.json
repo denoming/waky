@@ -1,0 +1,5 @@
+{
+  "name": "Http",
+  "version": "1.0.0",
+  "description": "Responsible for sending recorded audio to backend"
+}

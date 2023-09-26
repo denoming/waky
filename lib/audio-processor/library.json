@@ -1,0 +1,5 @@
+{
+  "name": "AudioProcessor",
+  "version": "1.0.0",
+  "description": "Responsible for getting histogram from given audio data"
+}

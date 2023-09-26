@@ -67,7 +67,7 @@ NeuralNetwork::setUp()
         return false;
     }
     size_t usedBytes = _interpreter->arena_used_bytes();
-    ESP_LOGD(TAG, "Used bytes %d\n", usedBytes);
+    ESP_LOGI(TAG, "Used bytes %d\n", usedBytes);
 
     _input = _interpreter->input(0);
     _output = _interpreter->output(0);
