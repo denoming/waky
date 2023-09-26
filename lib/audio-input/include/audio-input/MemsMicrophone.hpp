@@ -6,14 +6,15 @@
 #include <driver/i2s_std.h>
 
 #include "audio-input/AudioDataAccessor.hpp"
-#include "audio-input/AudioInputSampler.hpp"
 
-class MemsMicrophone final : public AudioInputSampler {
+class MemoryPool;
+
+class MemsMicrophone final {
 public:
     explicit MemsMicrophone(MemoryPool& memoryPool);
 
     bool
-    start(TaskHandle_t waiter) override;
+    start(TaskHandle_t waiter);
 
     AudioDataAccessor
     data();
