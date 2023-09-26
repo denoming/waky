@@ -8,9 +8,6 @@
 #include "nn/NeuralNetwork.hpp"
 #include "audio-processor/AudioProcessor.hpp"
 #include "http/AgentUploader.hpp"
-#ifdef DEBUG
-#include "misc/Utils.hpp"
-#endif
 
 #include <esp_err.h>
 #include <esp_log.h>
@@ -56,18 +53,6 @@ ApplicationImpl::setup()
         ESP_LOGE(TAG, "Failed to setup context");
         return false;
     }
-
-#ifdef DEBUG
-    ESP_LOGD(TAG, "Allocate memory for memory pool");
-#endif
-    if (!_memoryPool->allocate()) {
-        ESP_LOGE(TAG, "Failed to allocate memory for memory pool");
-        return false;
-    }
-
-#ifdef DEBUG
-    printHeapInfo(TAG, "After memory pool allocation");
-#endif
 
     return true;
 }

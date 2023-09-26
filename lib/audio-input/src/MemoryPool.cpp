@@ -1,5 +1,8 @@
 #include "audio-input/MemoryPool.hpp"
 
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+
 #include <esp_log.h>
 #include <esp_system.h>
 
@@ -8,9 +11,7 @@ static const char* TAG = "ESP32 TFLITE WWD - MM";
 MemoryPool::MemoryPool()
     : _chunks{}
 {
-    for (int i = 0; i < ChunkCount; ++i) {
-        _chunks[i] = nullptr;
-    }
+    allocate();
 }
 
 MemoryPool::~MemoryPool()
@@ -18,14 +19,15 @@ MemoryPool::~MemoryPool()
     deallocate();
 }
 
-bool
+void
 MemoryPool::allocate()
 {
     for (int i = 0; i < ChunkCount; ++i) {
         const auto freeHeap = esp_get_free_heap_size();
         if (freeHeap < ChunkSize) {
             ESP_LOGE(TAG, "Free heap memory is exhausted");
-            return false;
+            vTaskSuspend(nullptr);
+            return;
         }
 #ifdef DEBUG
         ESP_LOGD(TAG, "Allocate memory pool chunk: <%d>", i + 1);
@@ -33,8 +35,6 @@ MemoryPool::allocate()
         assert(_chunks[i] == nullptr);
         _chunks[i] = new Chunk;
     }
-
-    return true;
 }
 
 void

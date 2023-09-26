@@ -12,12 +12,6 @@ public:
 
     ~MemoryPool();
 
-    bool
-    allocate();
-
-    void
-    deallocate();
-
     void
     set(size_t index, int16_t value);
 
@@ -36,7 +30,6 @@ private:
         Chunk()
             : _payload{}
         {
-            _payload.fill(0);
         }
 
         void
@@ -54,6 +47,13 @@ private:
     private:
         std::array<int16_t, ChunkSize> _payload;
     };
+
+private:
+    void
+    allocate();
+
+    void
+    deallocate();
 
 private:
     std::array<Chunk*, ChunkCount> _chunks;
