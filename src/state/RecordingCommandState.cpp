@@ -9,10 +9,9 @@
 #include "misc/Utils.hpp"
 #endif
 
-#include <esp_err.h>
 #include <esp_log.h>
 
-static const char* TAG = "ESP32 JRVA - RecordingCommandState";
+static const char* TAG = "WAKY[RecordingCommandState]";
 
 static const long DEFAULT_POSITION{-1};
 

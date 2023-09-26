@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 
-static const char* TAG = "ESP32 JRVA - AgentUploader";
+static const char* TAG = "WAKY[AgentUploader]";
 
 namespace {
 

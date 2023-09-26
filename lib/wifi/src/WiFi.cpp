@@ -14,7 +14,7 @@
 
 #include "wifi/Config.hpp"
 
-static const char* TAG = "ESP32 WAKY - WiFi";
+static const char* TAG = "WAKY[WiFi]";
 
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT BIT1

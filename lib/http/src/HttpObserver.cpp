@@ -4,7 +4,7 @@
 #include <esp_err.h>
 #include <esp_log.h>
 
-static const char* TAG = "ESP32 JRVA - HttpObserver";
+static const char* TAG = "WAKY[HttpObserver]";
 #endif
 
 void

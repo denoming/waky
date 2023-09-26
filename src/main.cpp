@@ -7,7 +7,7 @@
 
 #include <esp_log.h>
 
-static const char* TAG = "ESP32 WAKY - Main";
+static const char* TAG = "WAKY[Main]";
 
 static WiFi wifi;
 static Application app;

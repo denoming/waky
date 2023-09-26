@@ -12,7 +12,7 @@
 #include <esp_err.h>
 #include <esp_log.h>
 
-static const char* TAG = "ESP32 JRVA - Application";
+static const char* TAG = "WAKY[Application]";
 
 class ApplicationImpl {
 public:

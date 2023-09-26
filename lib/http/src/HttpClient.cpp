@@ -3,7 +3,7 @@
 #include <esp_log.h>
 #include <esp_err.h>
 
-static const char* TAG = "ESP32 JRVA - HttpClient";
+static const char* TAG = "WAKY[HttpClient]";
 
 HttpClient::HttpClient(HttpObserver& observer)
     : HttpClient{observer, "127.0.0.1", 80, "/"}

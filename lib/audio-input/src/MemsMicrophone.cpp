@@ -7,7 +7,7 @@
 #include "misc/Utils.hpp"
 #endif
 
-static const char* TAG = "ESP32 TFLITE WWD - MM";
+static const char* TAG = "WAKY[MemsMicrophone]";
 
 // I2S interface pins configuration
 #define WAKY_I2S_MIC_SCK CONFIG_WAKY_I2S_MIC_SCK

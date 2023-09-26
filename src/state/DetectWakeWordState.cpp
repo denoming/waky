@@ -11,7 +11,7 @@
 
 #include <esp_log.h>
 
-static const char* TAG = "ESP32 JRVA - DetectWakeWorkState";
+static const char* TAG = "WAKY[DetectWakeWorkState]";
 
 DetectWakeWordState::DetectWakeWordState(StateContext& context, MemsMicrophone& sampler)
     : State{context}

@@ -7,7 +7,7 @@
 
 static const int kArenaSize = 25000;
 
-static const char* TAG = "ESP32 - NN";
+static const char* TAG = "WAKY[NeuralNetwork]";
 
 NeuralNetwork::NeuralNetwork()
     : _arena{nullptr}

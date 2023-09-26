@@ -6,7 +6,7 @@
 #include <esp_log.h>
 #include <esp_system.h>
 
-static const char* TAG = "ESP32 TFLITE WWD - MM";
+static const char* TAG = "WAKY[MemoryPool]";
 
 MemoryPool::MemoryPool()
     : _chunks{}
