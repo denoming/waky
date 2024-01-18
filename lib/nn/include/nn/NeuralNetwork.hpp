@@ -8,25 +8,25 @@ struct TfLiteTensor;
 
 class NeuralNetwork {
 public:
-    NeuralNetwork();
+    NeuralNetwork() = default;
 
-    bool
+    [[nodiscard]] bool
     setUp();
 
     void
     tearDown();
 
-    float*
+    [[nodiscard]] float*
     getInputBuffer();
 
-    float
+    [[nodiscard]] float
     predict();
 
 private:
-    uint8_t* _arena;
-    const tflite::Model* _model;
-    tflite::MicroMutableOpResolver<10>* _resolver;
-    tflite::MicroInterpreter* _interpreter;
-    TfLiteTensor* _input;
-    TfLiteTensor* _output;
+    uint8_t* _arena{};
+    const tflite::Model* _model{};
+    tflite::MicroMutableOpResolver<10>* _resolver{};
+    tflite::MicroInterpreter* _interpreter{};
+    TfLiteTensor* _input{};
+    TfLiteTensor* _output{};
 };

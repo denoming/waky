@@ -13,14 +13,14 @@ class MemsMicrophone final {
 public:
     explicit MemsMicrophone(MemoryPool& memoryPool);
 
-    bool
+    [[nodiscard]] bool
     start(TaskHandle_t waiter);
 
-    AudioDataAccessor
+    [[nodiscard]] AudioDataAccessor
     data();
 
 private:
-    size_t
+    [[nodiscard]] size_t
     pullAudioData(uint8_t* buffer, size_t size);
 
     void

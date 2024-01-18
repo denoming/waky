@@ -154,6 +154,10 @@ HttpClient::eventHandler(esp_http_client_event_t* event)
 {
     auto* self = static_cast<HttpClient*>(event->user_data);
     assert(self != nullptr);
+    if (self == nullptr) {
+        ESP_LOGE(TAG, "Invalid pointer value");
+        std::abort();
+    }
 
     switch (event->event_id) {
     case HTTP_EVENT_ERROR:

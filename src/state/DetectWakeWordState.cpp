@@ -37,7 +37,7 @@ DetectWakeWordState::run()
 #endif
 
     auto audioData = _sampler.data();
-    audioData.seek(audioData.pos() - CONFIG_WAKY_MEMPOOL_BUFFER_SIZE);
+    audioData.seek(long(audioData.pos()) - CONFIG_WAKY_MEMPOOL_BUFFER_SIZE);
     float* inputBuffer = _network.getInputBuffer();
     _processor.getSpectrogram(audioData, inputBuffer);
     const float score = _network.predict();

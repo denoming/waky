@@ -12,7 +12,7 @@ public:
 
     ~Application();
 
-    bool
+    [[nodiscard]] bool
     setup();
 
     void

@@ -25,7 +25,7 @@ public:
 private:
     MemsMicrophone& _sampler;
     AgentUploader& _uploader;
-    long _lastAudioPosition;
-    std::chrono::steady_clock::time_point _startTime;
-    std::chrono::steady_clock::duration _elapsedTime;
+    long _lastAudioPosition{};
+    std::chrono::steady_clock::time_point _startTime{};
+    std::chrono::steady_clock::duration _elapsedTime{};
 };

@@ -11,7 +11,7 @@ public:
     static const int kChunkConnection = -1;
     static const int kReadOnlyConnection = 0;
 
-    HttpClient(HttpObserver& observer);
+    explicit HttpClient(HttpObserver& observer);
 
     HttpClient(HttpObserver& observer, const char* host, const char* path);
 
@@ -19,37 +19,37 @@ public:
 
     ~HttpClient();
 
-    bool
+    [[nodiscard]] bool
     connected() const;
 
-    bool
+    [[nodiscard]] bool
     connect(int writeLength = kReadOnlyConnection);
 
-    bool
+    [[nodiscard]] bool
     disconnect();
 
-    int
+    [[nodiscard]] int
     fetchHeaders();
 
-    int
+    [[nodiscard]] int
     read(char* buffer, size_t size);
 
-    int
+    [[nodiscard]] int
     write(const char* data, size_t size) override;
 
-    bool
+    [[nodiscard]] bool
     setMethod(esp_http_client_method_t method);
 
-    bool
+    [[nodiscard]] bool
     setHeader(Http::Field field, const char* value);
 
-    bool
+    [[nodiscard]] bool
     setUrl(const char* value);
 
-    bool
+    [[nodiscard]] bool
     setTimeout(unsigned int value);
 
-    int
+    [[nodiscard]] int
     getStatusCode();
 
 protected:

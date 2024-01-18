@@ -25,7 +25,7 @@ public:
     start();
 
 private:
-    void
+    [[noreturn]] void
     main();
 
     static void
@@ -89,8 +89,8 @@ ApplicationImpl::main()
 #endif
     ESP_LOGI(TAG, "Start audio listening");
     if (!_sampler->start(xTaskGetCurrentTaskHandle())) {
-        ESP_LOGE(TAG, "Failed to start microphone listening");
-        return;
+        ESP_LOGE(TAG, "Unable to start microphone listening");
+        vTaskSuspend(nullptr);
     }
 
 #ifdef DEBUG
@@ -109,7 +109,9 @@ ApplicationImpl::run(void* param)
 {
     auto* impl = static_cast<ApplicationImpl*>(param);
     assert(impl != nullptr);
-    impl->main();
+    if (impl) {
+        impl->main();
+    }
 
     vTaskDelete(nullptr);
 }
@@ -129,12 +131,14 @@ bool
 Application::setup()
 {
     assert(_impl != nullptr);
-    return _impl->setup();
+    return _impl != nullptr && _impl->setup();
 }
 
 void
 Application::start()
 {
     assert(_impl != nullptr);
-    return _impl->start();
+    if (_impl) {
+        _impl->start();
+    }
 }

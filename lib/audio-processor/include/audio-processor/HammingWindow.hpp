@@ -11,5 +11,5 @@ public:
 
 private:
     std::unique_ptr<float[]> _coefficients;
-    int _windowSize;
+    int _windowSize{};
 };

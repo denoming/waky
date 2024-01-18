@@ -109,6 +109,11 @@ MemsMicrophone::processAudioData(const uint8_t* buffer, std::size_t size)
 
     const auto* samples = reinterpret_cast<const int32_t*>(buffer);
     assert(samples != nullptr);
+    if (samples == nullptr) {
+        ESP_LOGE(TAG, "Invalid pointer value");
+        std::abort();
+    }
+
     for (int i = 0; i < size / sizeof(int32_t); ++i) {
         _accessor.put(static_cast<int16_t>(samples[i] >> kDataBitShift));
     }
@@ -120,8 +125,12 @@ MemsMicrophone::pullAudioDataTask(void* param)
     static const size_t kNotifyThreshold = 1600;
     static const size_t kBufferSize = 1024;
 
-    assert(param != nullptr);
     auto* mic = static_cast<MemsMicrophone*>(param);
+    assert(mic != nullptr);
+    if (mic == nullptr) {
+        ESP_LOGE(TAG, "Invalid pointer value");
+        std::abort();
+    }
 
 #ifdef DEBUG
     printStackInfo(TAG, "Before pulling of data");

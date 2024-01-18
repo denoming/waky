@@ -219,6 +219,10 @@ WiFiImpl::eventHandler(void* arg, esp_event_base_t eventBase, int32_t eventId, v
 {
     auto* const self = static_cast<WiFiImpl*>(arg);
     assert(self != nullptr);
+    if (self == nullptr) {
+        ESP_LOGE(TAG, "Invalid pointer size");
+        std::abort();
+    }
 
     if (eventBase == WIFI_EVENT) {
         self->onWiFiEvent(eventId, eventData);
@@ -244,19 +248,21 @@ bool
 WiFi::setup()
 {
     assert(_impl != nullptr);
-    return _impl->setup();
+    return (_impl != nullptr) && _impl->setup();
 }
 
 bool
 WiFi::connect(uint32_t timeout)
 {
     assert(_impl != nullptr);
-    return _impl->connect(timeout);
+    return (_impl != nullptr) && _impl->connect(timeout);
 }
 
 void
 WiFi::finalise()
 {
     assert(_impl != nullptr);
-    return _impl->finalise();
+    if (_impl) {
+        _impl->finalise();
+    }
 }

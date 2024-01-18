@@ -1,10 +1,8 @@
 #include "http/AgentUploader.hpp"
 
 #include "http/HttpClient.hpp"
-#include "http/HttpChunkSender.hpp"
 
 #include <esp_assert.h>
-#include <esp_err.h>
 #include <esp_log.h>
 
 #include <cJSON.h>

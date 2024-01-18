@@ -10,9 +10,9 @@ StateContext::~StateContext() = default;
 bool
 StateContext::setup()
 {
-    _network.reset(new NeuralNetwork);
-    _processor.reset(new AudioProcessor);
-    _uploader.reset(new AgentUploader);
+    _network = std::make_unique<NeuralNetwork>();
+    _processor = std::make_unique<AudioProcessor>();
+    _uploader = std::make_unique<AgentUploader>();
 
     assert(_network);
     if (!_network->setUp()) {

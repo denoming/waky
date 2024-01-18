@@ -19,16 +19,16 @@ public:
     void
     setState(Args&&... args);
 
-    bool
+    [[nodiscard]] bool
     setup();
 
-    NeuralNetwork&
+    [[nodiscard]] NeuralNetwork&
     network();
 
-    AudioProcessor&
+    [[nodiscard]] AudioProcessor&
     processor();
 
-    AgentUploader&
+    [[nodiscard]] AgentUploader&
     uploader();
 
     void

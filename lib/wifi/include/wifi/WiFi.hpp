@@ -10,10 +10,10 @@ public:
 
     ~WiFi();
 
-    bool
+    [[nodiscard]] bool
     setup();
 
-    bool
+    [[nodiscard]] bool
     connect(uint32_t timeout = kMaxDelay);
 
     void

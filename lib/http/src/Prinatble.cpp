@@ -21,7 +21,7 @@ Printable::printf(const char* format, ...)
     };
     if (len >= sizeof(buffer)) {
         ptr = static_cast<char*>(malloc(len + 1));
-        if (ptr == NULL) {
+        if (ptr == nullptr) {
             va_end(arg);
             return -1;
         }

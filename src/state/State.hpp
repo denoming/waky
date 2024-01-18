@@ -4,14 +4,14 @@ class StateContext;
 
 class State {
 public:
-    State(StateContext& context);
+    explicit State(StateContext& context);
 
     virtual ~State() = default;
 
-    const StateContext&
+    [[nodiscard]] const StateContext&
     context() const;
 
-    StateContext&
+    [[nodiscard]] StateContext&
     context();
 
     virtual void

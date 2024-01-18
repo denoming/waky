@@ -61,17 +61,17 @@ RecordingCommandState::run()
 #ifdef DEBUG
         ESP_LOGD(TAG, "Initialize the last audio position");
 #endif
-        _lastAudioPosition = audioData.pos() - CONFIG_WAKY_MEMPOOL_BUFFER_SIZE;
+        _lastAudioPosition = long(audioData.pos()) - CONFIG_WAKY_MEMPOOL_BUFFER_SIZE;
     }
 
-    static const auto capacity = MemoryPool::capacity();
-    long sampleCount = (audioData.pos() - _lastAudioPosition + capacity) % capacity;
+    static const auto capacity = long(MemoryPool::capacity());
+    long sampleCount = (long(audioData.pos()) - _lastAudioPosition + capacity) % capacity;
 
     if (sampleCount > 0) {
 #ifdef DEBUG
         ESP_LOGD(TAG, "Upload <%ld> samples to backend", sampleCount);
 #endif
-        _lastAudioPosition = _uploader.upload(audioData, _lastAudioPosition, sampleCount);
+        _lastAudioPosition = long(_uploader.upload(audioData, _lastAudioPosition, sampleCount));
 
         const auto now = steady_clock::now();
         _elapsedTime += now - _startTime;

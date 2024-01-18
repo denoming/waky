@@ -72,7 +72,7 @@ AudioProcessor::getSpectrogram(AudioDataAccessor& audioData, float* outputSpectr
     const float mean = getMeanValue(audioData, _audioLength);
     const float maxDeviation = getMaxDeviationValue(audioData, _audioLength, mean);
 
-    const int startIndex = audioData.pos();
+    const int startIndex = int(audioData.pos());
     for (int windowStart = startIndex; windowStart < startIndex + _audioLength - _windowSize;
          windowStart += _stepSize) {
         audioData.seek(windowStart);

@@ -22,17 +22,17 @@ private:
     getSpectrogramSegment(float* outputSpectrogramRow);
 
 private:
-    int _audioLength;
-    int _windowSize;
-    int _stepSize;
-    int _poolingSize;
+    int _audioLength{};
+    int _windowSize{};
+    int _stepSize{};
+    int _poolingSize{};
 
-    int _fftSize;
+    int _fftSize{};
     std::unique_ptr<float[]> _fftInput;
     std::unique_ptr<kiss_fft_cpx[]> _fftOutput;
     std::unique_ptr<float[]> _energy;
-    int _energySize;
-    int _pooledEnergySize;
+    int _energySize{};
+    int _pooledEnergySize{};
 
     kiss_fftr_cfg _cfg;
 

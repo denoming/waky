@@ -6,24 +6,24 @@ class HttpClient;
 
 class HttpChunkSender {
 public:
-    HttpChunkSender(HttpClient& client);
+    explicit HttpChunkSender(HttpClient& client);
 
-    bool
+    [[nodiscard]] bool
     send(const char* data, std::size_t size);
 
-    bool
+    [[nodiscard]] bool
     send(const char* data);
 
-    bool
+    [[nodiscard]] bool
     startChunk(std::size_t size);
 
-    bool
+    [[nodiscard]] bool
     writeChunk(const char* data, std::size_t size);
 
-    bool
+    [[nodiscard]] bool
     endChunk();
 
-    bool
+    [[nodiscard]] bool
     finalize();
 
 private:

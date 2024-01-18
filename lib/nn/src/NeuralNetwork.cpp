@@ -2,22 +2,11 @@
 
 #include "nn/Model.hpp"
 
-#include <esp_err.h>
 #include <esp_log.h>
 
 static const int kArenaSize = 25000;
 
 static const char* TAG = "WAKY[NeuralNetwork]";
-
-NeuralNetwork::NeuralNetwork()
-    : _arena{nullptr}
-    , _model{nullptr}
-    , _resolver{nullptr}
-    , _interpreter{nullptr}
-    , _input{nullptr}
-    , _output{nullptr}
-{
-}
 
 bool
 NeuralNetwork::setUp()
