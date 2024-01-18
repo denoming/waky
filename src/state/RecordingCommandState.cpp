@@ -65,7 +65,7 @@ RecordingCommandState::run()
     }
 
     static const auto capacity = long(MemoryPool::capacity());
-    long sampleCount = (long(audioData.pos()) - _lastAudioPosition + capacity) % capacity;
+    const long sampleCount = (long(audioData.pos()) - _lastAudioPosition + capacity) % capacity;
 
     if (sampleCount > 0) {
 #ifdef DEBUG

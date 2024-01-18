@@ -49,7 +49,7 @@ void
 AudioDataAccessor::seek(long offset)
 {
     /* Normalization of negative offset */
-    const long totalSize = long(MemoryPool::capacity());
+    const auto totalSize = long(MemoryPool::capacity());
     _index = (offset + totalSize) % totalSize;
 }
 

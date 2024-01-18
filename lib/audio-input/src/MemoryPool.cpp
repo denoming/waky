@@ -53,8 +53,8 @@ void
 MemoryPool::set(size_t index, int16_t value)
 {
     assert(index < capacity());
-    const long chunkIdx = long(index / ChunkSize) % long(ChunkCount);
-    const long chunkPos = long(index % ChunkSize);
+    const auto chunkIdx = (index / ChunkSize) % ChunkCount;
+    const auto chunkPos = (index % ChunkSize);
     assert(_chunks[chunkIdx] != nullptr);
     _chunks[chunkIdx]->set(chunkPos, value);
 }
@@ -63,8 +63,8 @@ int16_t
 MemoryPool::get(std::size_t index) const
 {
     assert(index < capacity());
-    const long chunkIdx = long(index / ChunkSize) % long(ChunkCount);
-    const long chunkPos = long(index % ChunkSize);
+    const auto chunkIdx = (index / ChunkSize) % ChunkCount;
+    const auto chunkPos = (index % ChunkSize);
     assert(_chunks[chunkIdx] != nullptr);
     return _chunks[chunkIdx]->get(chunkPos);
 }
