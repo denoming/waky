@@ -1,8 +1,6 @@
 #include "wifi/Config.hpp"
 #include "wifi/WiFi.hpp"
-#ifdef DEBUG
-#include "misc/Utils.hpp"
-#endif
+#include "Utils.hpp"
 #include "Application.hpp"
 
 #include <esp_log.h>
@@ -15,20 +13,26 @@ static Application app;
 void
 setup()
 {
-    if (not wifi.setup()) {
-        ESP_LOGE(TAG, "Unable to setup <%s> WiFi AP", CONFIG_WAKY_WIFI_SSID);
+    if (wifi.setup()) {
+        ESP_LOGI(TAG, "Setup WiFi AP was successful");
+    } else {
+        ESP_LOGE(TAG, "Unable to setup WiFi AP");
+        taskDelay(1000);
         return;
     }
     if (wifi.connect()) {
-        ESP_LOGI(TAG, "Connecting to <%s> WiFi AP was successful", CONFIG_WAKY_WIFI_SSID);
+        ESP_LOGI(TAG, "Connecting to <%s> WiFi was successful", CONFIG_WAKY_WIFI_SSID);
     } else {
-        ESP_LOGE(TAG, "Unable to connect to <%s> WiFi AP", CONFIG_WAKY_WIFI_SSID);
+        ESP_LOGE(TAG, "Unable to connect to <%s> WiFi", CONFIG_WAKY_WIFI_SSID);
+        taskDelay(1000);
+        return;
     }
 
     if (app.setup()) {
         ESP_LOGI(TAG, "Setup application was successful");
     } else {
         ESP_LOGE(TAG, "Unable to setup application");
+        taskDelay(1000);
     }
 }
 

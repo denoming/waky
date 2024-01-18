@@ -7,6 +7,19 @@
 #include <esp_system.h>
 
 void
+taskDelay(uint32_t millis)
+{
+    vTaskDelay(pdMS_TO_TICKS(millis));
+}
+
+[[noreturn]] void
+taskSuspend()
+{
+    vTaskSuspend(nullptr);
+    while (true) { };
+}
+
+void
 printHeapInfo(const char* tag, const char* prefix)
 {
     const auto freeHeap = esp_get_free_heap_size();
