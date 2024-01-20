@@ -1,5 +1,7 @@
 # Waky
 
+![](doc/images/general.svg)
+
 ## Introduction
 
 Waky is an application responsible for detecting pre-configured word ("Marvin"),
