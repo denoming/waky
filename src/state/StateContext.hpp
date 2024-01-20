@@ -8,10 +8,11 @@ class NeuralNetwork;
 class AudioProcessor;
 class AgentUploader;
 class AudioDataAccessor;
+class LedIndicator;
 
 class StateContext {
 public:
-    StateContext() = default;
+    StateContext(LedIndicator& indicator);
 
     ~StateContext();
 
@@ -21,6 +22,9 @@ public:
 
     [[nodiscard]] bool
     setup();
+
+    [[nodiscard]] LedIndicator&
+    indicator();
 
     [[nodiscard]] NeuralNetwork&
     network();
@@ -35,6 +39,7 @@ public:
     proceed();
 
 private:
+    LedIndicator& _indicator;
     std::unique_ptr<State> _state;
     std::unique_ptr<NeuralNetwork> _network;
     std::unique_ptr<AudioProcessor> _processor;

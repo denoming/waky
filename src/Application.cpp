@@ -8,6 +8,7 @@
 #include "nn/NeuralNetwork.hpp"
 #include "audio-processor/AudioProcessor.hpp"
 #include "http/AgentUploader.hpp"
+#include "LedIndicator.hpp"
 
 #include <esp_err.h>
 #include <esp_log.h>
@@ -32,6 +33,7 @@ private:
     run(void* param);
 
 private:
+    LedIndicator _indicator;
     std::unique_ptr<StateContext> _context;
     std::unique_ptr<MemoryPool> _memoryPool;
     std::unique_ptr<MemsMicrophone> _sampler;
@@ -40,7 +42,7 @@ private:
 bool
 ApplicationImpl::setup()
 {
-    _context = std::make_unique<StateContext>();
+    _context = std::make_unique<StateContext>(_indicator);
     _memoryPool = std::make_unique<MemoryPool>();
     _sampler = std::make_unique<MemsMicrophone>(*_memoryPool);
 

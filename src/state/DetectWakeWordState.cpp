@@ -1,5 +1,6 @@
 #include "DetectWakeWordState.hpp"
 
+#include "LedIndicator.hpp"
 #include "StateContext.hpp"
 #include "RecordingCommandState.hpp"
 #include "nn/NeuralNetwork.hpp"
@@ -27,6 +28,8 @@ void
 DetectWakeWordState::enterState()
 {
     ESP_LOGI(TAG, "enterState()");
+
+    context().indicator().blink(LedColor::Blue, 3000);
 }
 
 void
@@ -54,4 +57,6 @@ void
 DetectWakeWordState::exitState()
 {
     ESP_LOGI(TAG, "exitState()");
+
+    context().indicator().off();
 }

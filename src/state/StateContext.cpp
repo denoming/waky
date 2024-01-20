@@ -4,6 +4,12 @@
 #include "audio-processor/AudioProcessor.hpp"
 #include "audio-input/AudioDataAccessor.hpp"
 #include "http/AgentUploader.hpp"
+#include "LedIndicator.hpp"
+
+StateContext::StateContext(LedIndicator& indicator)
+    : _indicator{indicator}
+{
+}
 
 StateContext::~StateContext() = default;
 
@@ -20,6 +26,12 @@ StateContext::setup()
     }
 
     return true;
+}
+
+[[nodiscard]] LedIndicator&
+StateContext::indicator()
+{
+    return _indicator;
 }
 
 NeuralNetwork&

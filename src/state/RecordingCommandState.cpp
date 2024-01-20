@@ -1,5 +1,6 @@
 #include "RecordingCommandState.hpp"
 
+#include "LedIndicator.hpp"
 #include "StateContext.hpp"
 #include "DetectWakeWordState.hpp"
 #include "audio-input/MemsMicrophone.hpp"
@@ -31,6 +32,8 @@ void
 RecordingCommandState::enterState()
 {
     ESP_LOGI(TAG, "enterState()");
+
+    context().indicator().on(LedColor::Green);
 
     _lastAudioPosition = DEFAULT_POSITION;
     _startTime = steady_clock::now();
@@ -94,6 +97,8 @@ void
 RecordingCommandState::exitState()
 {
     ESP_LOGI(TAG, "exitState()");
+
+    context().indicator().off();
 
     _uploader.disconnect();
 }
